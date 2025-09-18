@@ -16,23 +16,22 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.quickspeak.mobile.ui.theme.BlackGeneral
-import com.quickspeak.mobile.ui.theme.BlueDarkMode
-import com.quickspeak.mobile.ui.theme.WhiteGeneral
 
 /**
  * NAVIGATION DRAWER CONTENT
  * This is what appears inside the sliding sidebar
  */
 @Composable
-fun NavigationDrawerContent() {
-    var selectedMenuItem by remember { mutableStateOf("Tester") }
+fun NavigationDrawerContent(
+    currentScreen: String = "Tester",
+    onNavigate: (String) -> Unit = {}
+) {
 
     Column(
         modifier = Modifier
             .fillMaxHeight()
             .width(280.dp)
-            .background(BlackGeneral)
+            .background(MaterialTheme.colorScheme.background)
     ) {
         DrawerHeader()
         Spacer(modifier = Modifier.height(20.dp))
@@ -50,10 +49,9 @@ fun NavigationDrawerContent() {
         menuItems.forEach { item ->
             DrawerMenuItem(
                 item = item,
-                isSelected = selectedMenuItem == item.title,
+                isSelected = currentScreen == item.title,
                 onClick = {
-                    selectedMenuItem = item.title
-                    // TODO: Handle navigation to different screens
+                    onNavigate(item.title)
                 }
             )
         }
@@ -86,14 +84,14 @@ private fun DrawerHeader() {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(BlackGeneral)
+            .background(MaterialTheme.colorScheme.background)
             .padding(top = 40.dp, bottom = 20.dp),
         horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
             text = "QuickSpeak",
-            color = BlueDarkMode,
+            color = MaterialTheme.colorScheme.secondary,
             fontSize = 42.sp,
             fontWeight = FontWeight.Bold
         )
@@ -116,7 +114,7 @@ private fun DrawerMenuItem(
             .padding(horizontal = 20.dp)
             .background(
                 color = if (isSelected) {
-                    BlueDarkMode
+                    MaterialTheme.colorScheme.secondary
                 } else {
                     Color.Transparent
                 },
@@ -129,9 +127,9 @@ private fun DrawerMenuItem(
             imageVector = item.icon,
             contentDescription = item.title,
             tint = if (isSelected) {
-                BlackGeneral
+                MaterialTheme.colorScheme.onSecondary
             } else {
-                WhiteGeneral
+                MaterialTheme.colorScheme.onBackground
             },
             modifier = Modifier.size(24.dp)
         )
@@ -141,9 +139,9 @@ private fun DrawerMenuItem(
         Text(
             text = item.title,
             color = if (isSelected) {
-                BlackGeneral
+                MaterialTheme.colorScheme.onSecondary
             } else {
-                WhiteGeneral
+                MaterialTheme.colorScheme.onBackground
             },
             fontSize = 24.sp,
             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal

@@ -10,10 +10,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.tooling.preview.Preview
 import com.quickspeak.mobile.ui.components.navigation.NavigationDrawerContent
 import com.quickspeak.mobile.ui.screens.test.AvatarScreen
-import com.quickspeak.mobile.ui.theme.BlackGeneral
-import com.quickspeak.mobile.ui.theme.GrayDarkMode
-import com.quickspeak.mobile.ui.theme.RedDarkMode
-import com.quickspeak.mobile.ui.theme.Typography
+import com.quickspeak.mobile.ui.screens.speakers.SpeakerHome
+import com.quickspeak.mobile.ui.theme.QuickSpeakTheme
 import kotlinx.coroutines.launch
 
 /**
@@ -45,6 +43,7 @@ class MainActivity : ComponentActivity() {
  * - Navigation drawer (sidebar)
  * - Main content area
  * - Handles opening/closing the drawer
+ * - Navigation between different screens
  *
  * @OptIn tells Kotlin: "Yes, I know this is experimental API"
  */
@@ -56,6 +55,9 @@ fun QuickSpeakApp() {
     // the remember keeps this state alive even when UI redraws (recomposes)
     val drawerState = rememberDrawerState(DrawerValue.Closed)
 
+    // currentScreen: Tracks which screen is currently displayed
+    var currentScreen by remember { mutableStateOf("Tester") }
+
     // scope: Needed to launch animations (like drawer sliding)
     // Coroutines handle animations without blocking the UI thread
     val scope = rememberCoroutineScope()
@@ -66,38 +68,41 @@ fun QuickSpeakApp() {
     ModalNavigationDrawer(
         drawerState = drawerState,           // Connect our state to the drawer
         drawerContent = {                    // What shows inside the sidebar
-            NavigationDrawerContent()
-        },
-        content = {                          // Main app content (the avatar screen)
-            AvatarScreen(
-                onMenuClick = {              // When hamburger menu is clicked...
-                    scope.launch {           // Start an animation...
-                        drawerState.open()   // ...to open the drawer
+            NavigationDrawerContent(
+                currentScreen = currentScreen,
+                onNavigate = { screen ->
+                    currentScreen = screen
+                    scope.launch {
+                        drawerState.close()
                     }
                 }
             )
+        },
+        content = {                          // Main app content
+            when (currentScreen) {
+                "Speakers" -> {
+                    SpeakerHome(
+                        onMenuClick = {
+                            scope.launch {
+                                drawerState.open()
+                            }
+                        }
+                    )
+                }
+                else -> {
+                    AvatarScreen(
+                        onMenuClick = {              // When hamburger menu is clicked...
+                            scope.launch {           // Start an animation...
+                                drawerState.open()   // ...to open the drawer
+                            }
+                        }
+                    )
+                }
+            }
         }
     )
 }
 
-/**
- * APP THEME
- * Separated theme definition for clean organization
- */
-@Composable
-fun QuickSpeakTheme(
-    content: @Composable () -> Unit
-) {
-    MaterialTheme(
-        colorScheme = darkColorScheme(
-            primary = RedDarkMode,
-            background = BlackGeneral,
-            surface = GrayDarkMode
-        ),
-        typography = Typography,
-        content = content
-    )
-}
 
 /**
  * PREVIEW FUNCTION

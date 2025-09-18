@@ -19,12 +19,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
-import com.quickspeak.mobile.ui.theme.BlackGeneral
-import com.quickspeak.mobile.ui.theme.BlueDarkMode
-import com.quickspeak.mobile.ui.theme.GrayDarkMode
-import com.quickspeak.mobile.ui.theme.GrayLightMode
-import com.quickspeak.mobile.ui.theme.YellowDarkMode
-import com.quickspeak.mobile.ui.theme.YellowLightMode
 import kotlin.random.Random
 
 /**
@@ -48,7 +42,7 @@ fun AvatarScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(BlackGeneral)
+            .background(MaterialTheme.colorScheme.background)
     ) {
         // TOP BAR SECTION
         AvatarTopAppBar(
@@ -126,7 +120,7 @@ private fun AvatarTopAppBar(
             Icon(
                 imageVector = Icons.Default.Menu,
                 contentDescription = "Open menu",
-                tint = BlueDarkMode,
+                tint = MaterialTheme.colorScheme.secondary,
                 modifier = Modifier.size(48.dp)
             )
         }
@@ -136,7 +130,7 @@ private fun AvatarTopAppBar(
         // APP TITLE
         Text(
             text = title,
-            color = BlueDarkMode,
+            color = MaterialTheme.colorScheme.secondary,
             fontSize = 28.sp,
             fontWeight = FontWeight.Bold
         )
@@ -160,7 +154,7 @@ private fun AvatarDisplay(
         Card(
             modifier = Modifier.size(280.dp),
             colors = CardDefaults.cardColors(
-                containerColor = GrayDarkMode
+                containerColor = MaterialTheme.colorScheme.surface
             ),
             shape = RoundedCornerShape(20.dp),
             elevation = CardDefaults.cardElevation(
@@ -174,7 +168,7 @@ private fun AvatarDisplay(
                 when {
                     isLoading -> {
                         CircularProgressIndicator(
-                            color = BlueDarkMode,
+                            color = MaterialTheme.colorScheme.secondary,
                             modifier = Modifier.size(48.dp)
                         )
                     }
@@ -195,13 +189,13 @@ private fun AvatarDisplay(
                             Icon(
                                 imageVector = Icons.Default.Person,
                                 contentDescription = "No avatar",
-                                tint = Color.White.copy(alpha = 0.6f),
+                                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                                 modifier = Modifier.size(64.dp)
                             )
                             Spacer(modifier = Modifier.height(16.dp))
                             Text(
                                 text = "Generate an avatar!",
-                                color = Color.White.copy(alpha = 0.6f),
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                                 fontSize = 16.sp
                             )
                         }
@@ -233,7 +227,7 @@ private fun AvatarInputSection(
         ) {
             Text(
                 text = "Random Mode",
-                color = Color.White,
+                color = MaterialTheme.colorScheme.onBackground,
                 fontSize = 16.sp
             )
             Spacer(modifier = Modifier.width(12.dp))
@@ -241,8 +235,8 @@ private fun AvatarInputSection(
                 checked = isRandomMode,
                 onCheckedChange = onRandomModeChange,
                 colors = SwitchDefaults.colors(
-                    checkedThumbColor = BlueDarkMode,
-                    checkedTrackColor = BlueDarkMode.copy(alpha = 0.5f)
+                    checkedThumbColor = MaterialTheme.colorScheme.secondary,
+                    checkedTrackColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f)
                 )
             )
         }
@@ -255,24 +249,24 @@ private fun AvatarInputSection(
                 label = {
                     Text(
                         text = "Enter a name (optional)",
-                        color = Color.White.copy(alpha = 0.7f)
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
                     )
                 },
                 placeholder = {
                     Text(
                         text = "e.g., John, Alice, Felix",
-                        color = Color.White.copy(alpha = 0.5f)
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f)
                     )
                 },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 32.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedTextColor = Color.White,
-                    unfocusedTextColor = Color.White,
-                    focusedBorderColor = BlueDarkMode,
-                    unfocusedBorderColor = GrayLightMode,
-                    cursorColor = BlueDarkMode
+                    focusedTextColor = MaterialTheme.colorScheme.onBackground,
+                    unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
+                    focusedBorderColor = MaterialTheme.colorScheme.secondary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                    cursorColor = MaterialTheme.colorScheme.secondary
                 ),
                 shape = RoundedCornerShape(12.dp),
                 singleLine = true
@@ -297,7 +291,7 @@ private fun GenerateAvatarButton(
             .padding(bottom = 146.dp)
             .height(56.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = YellowDarkMode
+            containerColor = MaterialTheme.colorScheme.primary
         ),
         shape = RoundedCornerShape(28.dp),
         elevation = ButtonDefaults.buttonElevation(
@@ -310,13 +304,13 @@ private fun GenerateAvatarButton(
             Icon(
                 imageVector = Icons.Default.Refresh,
                 contentDescription = null,
-                tint = BlackGeneral,
+                tint = MaterialTheme.colorScheme.onTertiary,
                 modifier = Modifier.size(24.dp)
             )
             Spacer(modifier = Modifier.width(12.dp))
             Text(
                 text = "Generate Avatar",
-                color = BlackGeneral,
+                color = MaterialTheme.colorScheme.onTertiary,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold
             )
