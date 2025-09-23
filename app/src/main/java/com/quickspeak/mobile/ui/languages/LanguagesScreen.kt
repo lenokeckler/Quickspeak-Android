@@ -27,7 +27,7 @@ import com.quickspeak.mobile.ui.theme.BlueDarkMode
 
 @Composable
 fun LanguagesScreen(
-    onMenuClick: () -> Unit, // aquí es nuestro botón de regresar
+    onMenuClick: () -> Unit,
     initialLanguages: List<Language> = listOf(
         Language("English", "US", true),
         Language("Português", "ES"),
@@ -46,7 +46,6 @@ fun LanguagesScreen(
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Top Bar con botón de retroceso
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -109,10 +108,19 @@ fun LanguagesScreen(
 
         Button(
             onClick = {
-                if (languages.none { it.countryCode.equals("ES", true) }) {
-                    languages = languages + Language("Español", "ES")
+                val newLanguages = listOf(
+                    Language("漢語", "CN"),
+                    Language("Русский", "RU"),
+                    Language("العربية", "AE")
+                )
+
+                val languagesToAdd = newLanguages.filter { newLang ->
+                    languages.none { it.countryCode == newLang.countryCode }
                 }
-            },
+
+                languages = languages + languagesToAdd
+            }
+            ,
             colors = ButtonDefaults.buttonColors(containerColor = BlueDarkMode),
             shape = RoundedCornerShape(24.dp),
             modifier = Modifier
