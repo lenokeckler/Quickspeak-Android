@@ -9,6 +9,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.tooling.preview.Preview
 import com.quickspeak.mobile.ui.components.navigation.NavigationDrawerContent
+import com.quickspeak.mobile.ui.screens.languages.LanguagesScreen
 import com.quickspeak.mobile.ui.screens.test.AvatarScreen
 import com.quickspeak.mobile.ui.screens.speakers.SpeakerHome
 import com.quickspeak.mobile.ui.theme.QuickSpeakTheme
@@ -82,6 +83,15 @@ fun QuickSpeakApp() {
             when (currentScreen) {
                 "Speakers" -> {
                     SpeakerHome(
+                        onMenuClick = {
+                            scope.launch {
+                                drawerState.open()
+                            }
+                        }
+                    )
+                }
+                "Languages" -> {
+                    LanguagesScreen(
                         onMenuClick = {
                             scope.launch {
                                 drawerState.open()

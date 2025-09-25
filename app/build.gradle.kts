@@ -64,4 +64,5 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.activity.compose.v182)
+    implementation("me.tankery.lib:circularSeekBar:1.4.2")
 }
