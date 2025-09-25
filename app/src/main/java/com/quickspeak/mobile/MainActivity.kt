@@ -9,7 +9,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.tooling.preview.Preview
 import com.quickspeak.mobile.ui.components.navigation.NavigationDrawerContent
-import com.quickspeak.mobile.ui.screens.languages.LanguagesScreen
+import com.quickspeak.mobile.ui.screens.languages.LanguagesNavigation
 import com.quickspeak.mobile.ui.screens.test.AvatarScreen
 import com.quickspeak.mobile.ui.screens.speakers.SpeakerHome
 import com.quickspeak.mobile.ui.theme.QuickSpeakTheme
@@ -91,7 +91,7 @@ fun QuickSpeakApp() {
                     )
                 }
                 "Languages" -> {
-                    LanguagesScreen(
+                    LanguagesNavigation(
                         onMenuClick = {
                             scope.launch {
                                 drawerState.open()
