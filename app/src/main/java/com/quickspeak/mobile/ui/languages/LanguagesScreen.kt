@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -43,7 +44,7 @@ fun LanguagesScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(BlackGeneral)
-            .padding(16.dp),
+            .padding(30.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Row(
@@ -61,7 +62,10 @@ fun LanguagesScreen(
                 )
             }
             Spacer(modifier = Modifier.width(8.dp))
-            Text(text = "Languages", color = BlueDarkMode, fontSize = 24.sp)
+            Text(text = "Languages",
+                color = BlueDarkMode,
+                fontSize = 28.sp,
+                fontWeight = FontWeight.Bold)
         }
 
         // Grid de banderas (3 por fila)
