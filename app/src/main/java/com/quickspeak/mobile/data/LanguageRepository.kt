@@ -53,6 +53,30 @@ object LanguageRepository {
     }
 
     fun removeLanguageFromLearning(language: Language) {
+        // Cannot remove native language
+        if (language.isNative) return
         _learningLanguages.removeAll { it.countryCode == language.countryCode }
+    }
+
+    fun setAsNativeLanguage(language: Language) {
+        // Remove native status from all languages first
+        val updatedLanguages = _learningLanguages.map { lang ->
+            if (lang.countryCode == language.countryCode) {
+                lang.copy(isNative = true)
+            } else {
+                lang.copy(isNative = false)
+            }
+        }
+
+        _learningLanguages.clear()
+        _learningLanguages.addAll(updatedLanguages)
+    }
+
+    fun getNativeLanguage(): Language? {
+        return _learningLanguages.find { it.isNative }
+    }
+
+    fun canRemoveLanguage(language: Language): Boolean {
+        return !language.isNative
     }
 }
