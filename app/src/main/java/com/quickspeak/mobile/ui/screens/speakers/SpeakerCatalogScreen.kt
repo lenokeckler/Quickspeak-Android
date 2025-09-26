@@ -1,15 +1,12 @@
 package com.quickspeak.mobile.ui.screens.speakers
 
-import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -39,36 +36,17 @@ import com.quickspeak.mobile.data.LanguageRepository
 import com.quickspeak.mobile.data.UserRepository
 import com.quickspeak.mobile.ui.components.SpeakerCard
 import com.quickspeak.mobile.ui.theme.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
-/**
- * LANGUAGE FILTER DATA CLASS
- * Represents a language filter option with its active state and styling
- */
+
 data class LanguageFilter(
     val name: String,
     val flag: String,
     val isActive: Boolean = false
 )
 
-/**
- * SPEAKER CATALOG SCREEN
- * Main catalog screen showing all available speakers with filtering capabilities
- * Based on the web version but adapted for Android/Jetpack Compose
- *
- * Features:
- * - Gradient background (dark/light theme aware)
- * - Large title with cyan accent color (updated to blue for consistency)
- * - Language filter chips
- * - Grid layout of speaker cards with smooth enter/exit/position animations
- * - Selection blur and hover simulation for cards
- * - Back navigation
- *
- * Animation Approach:
- * - AnimatedVisibility for item enter (fadeIn + expand)/exit (fadeOut + shrink) on filter/save changes
- * - animateContentSize for internal card state changes (e.g., selection)
- * - Built-in lazy reordering for position shifts (via stable keys)
- * - No experimental APIs—stable and performant for mobile
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SpeakerCatalogScreen(
@@ -77,66 +55,67 @@ fun SpeakerCatalogScreen(
 ) {
     val systemDarkTheme = isSystemInDarkTheme()
     val isDarkTheme = UserRepository.getEffectiveDarkMode(systemDarkTheme)
+    val scope = rememberCoroutineScope()
 
-    // STATE MANAGEMENT - Get filters from user's learning languages
-    var languageFilters by remember {
-        mutableStateOf(getLanguageFiltersFromRepository())
-    }
+    var languageFilters by remember { mutableStateOf(getLanguageFiltersFromRepository()) }
+    var selectedSpeakerId by remember { mutableIntStateOf(-1) }
 
-    var hoveredSpeakerId by remember {
-        mutableIntStateOf(-1)
-    }
+    var displayedSpeakers by remember { mutableStateOf<List<Speaker>>(emptyList()) }
+    var fadingOutSpeakerIds by remember { mutableStateOf<Set<Int>>(emptySet()) }
 
-    var selectedSpeakerId by remember {
-        mutableIntStateOf(-1)
-    }
-
-    // Track speakers that were saved but should remain visible until user taps away
-    var recentlySavedSpeakers by remember { mutableStateOf(setOf<Int>()) }
-
-    // COMPUTED VALUES - Show speakers for languages the user has, filtered by active selections and excluding saved speakers
-    val filteredSpeakers = remember(languageFilters, recentlySavedSpeakers) {
+    val sourceSpeakers = remember(languageFilters) {
         val activeLanguages = languageFilters.filter { it.isActive }.map { it.name }
         val savedSpeakerIds = ChatRepository.savedSpeakers.map { it.speakerId }.toSet()
 
         val availableSpeakers = SpeakerData.getAllSpeakers().filter { speaker ->
-            // Include speakers for any language the user is learning (including native)
-            // BUT exclude speakers that are already saved (unless recently saved and still visible)
-            LanguageRepository.learningLanguages.any { userLang ->
-                userLang.name == speaker.language
-            } && (!savedSpeakerIds.contains(speaker.id) || recentlySavedSpeakers.contains(speaker.id))
+            LanguageRepository.learningLanguages.any { userLang -> userLang.name == speaker.language } &&
+            !savedSpeakerIds.contains(speaker.id)
         }
 
         if (activeLanguages.isEmpty()) {
             availableSpeakers
         } else {
-            availableSpeakers.filter { speaker ->
-                activeLanguages.contains(speaker.language)
+            availableSpeakers.filter { speaker -> activeLanguages.contains(speaker.language) }
+        }
+    }
+
+    LaunchedEffect(sourceSpeakers) {
+        val fadingSpeakers = displayedSpeakers.filter { it.id in fadingOutSpeakerIds }
+        val newSpeakers = sourceSpeakers.filter { it.id !in fadingOutSpeakerIds }
+        displayedSpeakers = (fadingSpeakers + newSpeakers).distinctBy { it.id }
+    }
+
+    fun handleDeselection(deselectedId: Int) {
+        if (deselectedId == -1) return
+
+        val speakerToAnimate = displayedSpeakers.find { it.id == deselectedId }
+        if (speakerToAnimate != null && ChatRepository.isSpeakerSaved(speakerToAnimate.id)) {
+            fadingOutSpeakerIds = fadingOutSpeakerIds + speakerToAnimate.id
+            scope.launch {
+                delay(400) // Animation duration
+                displayedSpeakers = displayedSpeakers.filter { it.id != speakerToAnimate.id }
+                fadingOutSpeakerIds = fadingOutSpeakerIds - speakerToAnimate.id
             }
         }
     }
 
-    // MAIN CONTAINER WITH GRADIENT BACKGROUND
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(
                 brush = if (isDarkTheme) {
-                    Brush.verticalGradient(
-                        colors = listOf(
-                            BlackGeneral,
-                            Color(0xFF2C006E)
-                        )
-                    )
+                    Brush.verticalGradient(colors = listOf(BlackGeneral, Color(0xFF2C006E)))
                 } else {
-                    Brush.verticalGradient(
-                        colors = listOf(
-                            WhiteGeneral,
-                            Color(0x7C7C01F6)
-                        )
-                    )
+                    Brush.verticalGradient(colors = listOf(WhiteGeneral, Color(0x7C7C01F6)))
                 }
             )
+            .clickable( // Clickable background to handle deselection
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null
+            ) {
+                handleDeselection(selectedSpeakerId)
+                selectedSpeakerId = -1
+            }
             .statusBarsPadding()
             .navigationBarsPadding()
     ) {
@@ -145,42 +124,19 @@ fun SpeakerCatalogScreen(
                 .fillMaxSize()
                 .padding(horizontal = 16.dp)
         ) {
-            // TOP BAR WITH BACK BUTTON AND TITLE
-            SpeakerCatalogTopBar(
-                onBackClick = onBackClick,
-                isDarkTheme = isDarkTheme
-            )
-
+            SpeakerCatalogTopBar(onBackClick = onBackClick, isDarkTheme = isDarkTheme)
             Spacer(modifier = Modifier.height(24.dp))
-
-            // LANGUAGE FILTER CHIPS - WRAPPING LAYOUT
-            FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 8.dp)
-            ) {
-                languageFilters.forEach { filter ->
-                    LanguageFilterChip(
-                        filter = filter,
-                        isDarkTheme = isDarkTheme,
-                        onToggle = { languageName ->
-                            languageFilters = languageFilters.map { lang ->
-                                if (lang.name == languageName) {
-                                    lang.copy(isActive = !lang.isActive)
-                                } else {
-                                    lang
-                                }
-                            }
-                        }
-                    )
+            LanguageFilters(
+                languageFilters = languageFilters,
+                isDarkTheme = isDarkTheme,
+                onToggle = { languageName ->
+                    languageFilters = languageFilters.map { 
+                        if (it.name == languageName) it.copy(isActive = !it.isActive) else it
+                    }
                 }
-            }
-
+            )
             Spacer(modifier = Modifier.height(32.dp))
 
-            // SPEAKERS GRID WITH ANIMATIONS
             LazyVerticalGrid(
                 columns = GridCells.Adaptive(minSize = 300.dp),
                 verticalArrangement = Arrangement.spacedBy(24.dp),
@@ -188,74 +144,78 @@ fun SpeakerCatalogScreen(
                 contentPadding = PaddingValues(bottom = 32.dp)
             ) {
                 items(
-                    items = filteredSpeakers,
-                    key = { it.id }  // Stable key for smooth reordering/position animations
+                    items = displayedSpeakers,
+                    key = { it.id }
                 ) { speaker ->
-                    // AnimatedVisibility for enter/exit (triggers on filter/save changes)
-                    AnimatedVisibility(
-                        visible = true,  // Item is always "visible" if in filteredSpeakers
-                        enter = fadeIn(animationSpec = tween(400)) +
-                                expandVertically(
-                                    animationSpec = tween(400),
-                                    expandFrom = Alignment.Top
-                                ),
-                        exit = fadeOut(animationSpec = tween(400)) +
-                                shrinkVertically(
-                                    animationSpec = tween(400),
-                                    shrinkTowards = Alignment.Top
-                                )
-                    ) {
-                        // SpeakerCard with internal animations
-                        val isBlurred = selectedSpeakerId != -1 && selectedSpeakerId != speaker.id
-                        val isSelected = selectedSpeakerId == speaker.id
-                        val isHovered = hoveredSpeakerId == speaker.id
+                    val isFadingOut = speaker.id in fadingOutSpeakerIds
+                    val animatedAlpha by animateFloatAsState(
+                        targetValue = if (isFadingOut) 0f else 1f,
+                        animationSpec = tween(400),
+                        label = "alpha"
+                    )
+                    val animatedScale by animateFloatAsState(
+                        targetValue = if (isFadingOut) 0.9f else 1f,
+                        animationSpec = tween(400),
+                        label = "scale"
+                    )
 
-                        // Apply blur animation to non-selected cards
-                        val animatedModifier = Modifier
-                            .animateContentSize(animationSpec = tween(300))  // Smooth size/scale on state change
+                    val isBlurred = selectedSpeakerId != -1 && selectedSpeakerId != speaker.id
+
+                    SpeakerCard(
+                        modifier = Modifier
                             .graphicsLayer {
-                                alpha = if (isBlurred) 0.6f else 1f
+                                alpha = if (isBlurred) 0.6f else animatedAlpha
+                                scaleX = animatedScale
+                                scaleY = animatedScale
                             }
+                            .animateContentSize(animationSpec = tween(300)),
+                        speaker = speaker,
+                        isBlurred = isBlurred,
+                        isSelected = selectedSpeakerId == speaker.id,
+                        onCardClick = {
+                            val previouslySelectedId = selectedSpeakerId
+                            val newSelectedId = if (previouslySelectedId == speaker.id) -1 else speaker.id
 
-                        SpeakerCard(
-                            modifier = animatedModifier,  // Apply animations here
-                            speaker = speaker,
-                            isBlurred = isBlurred,
-                            isSelected = isSelected,
-                            onCardHover = { isHovering ->
-                                if (selectedSpeakerId == -1) {  // Only hover if no card is selected
-                                    hoveredSpeakerId = if (isHovering) speaker.id else -1
-                                }
-                            },
-                            onCardClick = {
-                                if (selectedSpeakerId == speaker.id) {
-                                    // Clicking away from selected card
-                                    selectedSpeakerId = -1
-                                    // Remove recently saved speakers when clicking away
-                                    recentlySavedSpeakers = recentlySavedSpeakers - speaker.id
-                                } else {
-                                    // Selecting a new card
-                                    selectedSpeakerId = speaker.id
-                                }
-                            },
-                            onStartChat = { onSpeakerClick(speaker) },
-                            onSaveSpeaker = {
-                                ChatRepository.addSavedSpeaker(speaker)
-                                recentlySavedSpeakers = recentlySavedSpeakers + speaker.id
-                                // Don't reset selection - let user tap away manually
+                            if (previouslySelectedId != newSelectedId) {
+                                handleDeselection(previouslySelectedId)
                             }
-                        )
-                    }
+                            
+                            selectedSpeakerId = newSelectedId
+                        },
+                        onStartChat = { onSpeakerClick(speaker) },
+                        onSaveSpeaker = {
+                            ChatRepository.addSavedSpeaker(speaker)
+                        }
+                    )
                 }
             }
         }
     }
 }
 
-/**
- * TOP BAR COMPONENT
- * Contains back button and title aligned like other screens
- */
+@Composable
+private fun LanguageFilters(
+    languageFilters: List<LanguageFilter>,
+    isDarkTheme: Boolean,
+    onToggle: (String) -> Unit
+) {
+    FlowRow(
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp)
+    ) {
+        languageFilters.forEach { filter ->
+            LanguageFilterChip(
+                filter = filter,
+                isDarkTheme = isDarkTheme,
+                onToggle = onToggle
+            )
+        }
+    }
+}
+
 @Composable
 private fun SpeakerCatalogTopBar(
     onBackClick: () -> Unit,
@@ -267,9 +227,7 @@ private fun SpeakerCatalogTopBar(
             .padding(top = 28.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        IconButton(
-            onClick = onBackClick
-        ) {
+        IconButton(onClick = onBackClick) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                 contentDescription = "Back",
@@ -277,10 +235,7 @@ private fun SpeakerCatalogTopBar(
                 modifier = Modifier.size(48.dp)
             )
         }
-
         Spacer(modifier = Modifier.width(16.dp))
-
-        // TITLE ALIGNED WITH BACK BUTTON
         Text(
             text = "Speaker Catalog",
             color = if (isDarkTheme) BlueDarkMode else BlueLightMode,
@@ -290,11 +245,6 @@ private fun SpeakerCatalogTopBar(
     }
 }
 
-/**
- * LANGUAGE FILTER CHIP COMPONENT
- * Individual filter button for languages
- * Matches the web version design with dashed borders for inactive state
- */
 @Composable
 private fun LanguageFilterChip(
     filter: LanguageFilter,
@@ -306,28 +256,25 @@ private fun LanguageFilterChip(
     } else {
         Color.Transparent
     }
-
     val textColor = if (filter.isActive) {
         if (isDarkTheme) WhiteGeneral else BlackGeneral
     } else {
         if (isDarkTheme) Color(0xFF9CA3AF) else Color(0xFF6B7280)
     }
-
     val borderColor = if (filter.isActive) {
         backgroundColor
     } else {
         if (isDarkTheme) Color(0xFF6B7280) else Color(0xFF9CA3AF)
     }
 
-    // Optional: Animate chip toggle for polish
     Surface(
         modifier = Modifier
             .clip(RoundedCornerShape(25.dp))
             .clickable { onToggle(filter.name) }
-            .animateContentSize(animationSpec = tween(300)),  // Smooth color/size change on toggle
+            .animateContentSize(animationSpec = tween(300)),
         shape = RoundedCornerShape(25.dp),
-        color = backgroundColor,  // Use backgroundColor directly
-        border = BorderStroke(1.dp, borderColor)  // Now resolves with import
+        color = backgroundColor,
+        border = BorderStroke(1.dp, borderColor)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -340,12 +287,10 @@ private fun LanguageFilterChip(
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold
             )
-
-            // FLAG EMOJI IN CIRCLE
             Box(
                 modifier = Modifier
                     .size(24.dp)
-                    .clip(RoundedCornerShape(12.dp))  // Clip for smooth animation
+                    .clip(RoundedCornerShape(12.dp))
                     .background(
                         color = if (filter.isActive) {
                             if (isDarkTheme) Color.Black.copy(alpha = 0.2f) else Color.White.copy(alpha = 0.5f)
@@ -365,20 +310,15 @@ private fun LanguageFilterChip(
     }
 }
 
-/**
- * DATA HELPER FUNCTIONS
- */
 private fun getLanguageFiltersFromRepository(): List<LanguageFilter> {
     return LanguageRepository.learningLanguages
         .mapNotNull { userLanguage ->
             val flagEmoji = getLanguageFlagEmoji(userLanguage.name)
-
-            // Only include if we have speakers for this language
             if (SpeakerData.getAllSpeakers().any { it.language == userLanguage.name }) {
                 LanguageFilter(
                     name = userLanguage.name,
                     flag = flagEmoji,
-                    isActive = !userLanguage.isNative // Native language starts inactive, others start active
+                    isActive = !userLanguage.isNative
                 )
             } else {
                 null
@@ -386,9 +326,6 @@ private fun getLanguageFiltersFromRepository(): List<LanguageFilter> {
         }
 }
 
-/**
- * Gets flag emoji for speaker language names
- */
 private fun getLanguageFlagEmoji(languageName: String): String {
     return when (languageName) {
         "German" -> "🇩🇪"
@@ -407,9 +344,6 @@ private fun getLanguageFlagEmoji(languageName: String): String {
     }
 }
 
-/**
- * PREVIEW FUNCTIONS
- */
 @Preview(showBackground = true)
 @Composable
 fun SpeakerCatalogScreenPreview() {

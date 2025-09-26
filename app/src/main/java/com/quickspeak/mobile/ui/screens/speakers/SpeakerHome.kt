@@ -387,9 +387,11 @@ private fun RecentsSection(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 itemsIndexed(activeChats.sortedByDescending { it.lastMessageTime }) { index, chat ->
-                    // Get custom color for this speaker if set, otherwise use default pattern
+                    val speaker = SpeakerData.getAllSpeakers().find { it.id == chat.speakerId }
+                    // Get custom color for this speaker if set
                     val customColor = ChatRepository.getSpeakerColor(chat.speakerId)
-                    val cardColor = customColor ?: getChatCardColor(index)
+                    // Use custom color, or speaker's default background, or fallback to index-based color
+                    val cardColor = customColor ?: speaker?.colorClasses?.cardBackground ?: getChatCardColor(index)
 
                     RecentChatCard(
                         chat = chat,
@@ -397,8 +399,7 @@ private fun RecentsSection(
                         isDarkTheme = isDarkTheme,
                         onClick = {
                             // Find the full speaker data and open chat
-                            val fullSpeaker = SpeakerData.getAllSpeakers().find { it.id == chat.speakerId }
-                            fullSpeaker?.let { onChatClick(it) }
+                            speaker?.let { onChatClick(it) }
                         }
                     )
                 }
