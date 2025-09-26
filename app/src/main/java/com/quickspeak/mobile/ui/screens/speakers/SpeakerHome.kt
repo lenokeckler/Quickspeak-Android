@@ -1,7 +1,9 @@
 package com.quickspeak.mobile.ui.screens.speakers
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -17,11 +19,16 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil3.compose.AsyncImage
+import com.quickspeak.mobile.data.ChatRepository
+import com.quickspeak.mobile.domain.model.*
 
 /**
  * SPEAKER HOME SCREEN
@@ -30,41 +37,80 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun SpeakerHome(
     onMenuClick: () -> Unit,
-    onSpeakerCatalogClick: () -> Unit = {}
+    onSpeakerCatalogClick: () -> Unit = {},
+    onChatClick: (Speaker) -> Unit = {}
 ) {
-    Column(
+    val isDarkTheme = isSystemInDarkTheme()
+
+    // Get data from ChatRepository
+    val savedSpeakers = remember { ChatRepository.savedSpeakers }
+    val activeChats = remember { ChatRepository.activeChats }
+
+    // MAIN CONTAINER WITH GRADIENT BACKGROUND
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .background(
+                brush = if (isDarkTheme) {
+                    Brush.verticalGradient(
+                        colors = listOf(
+                            BlackGeneral,
+                            Color(0xFF2C006E)
+                        )
+                    )
+                } else {
+                    Brush.verticalGradient(
+                        colors = listOf(
+                            WhiteGeneral,
+                            Color(0xFFE9D5FF) // Purple-200 equivalent
+                        )
+                    )
+                }
+            )
     ) {
-        // TOP BAR SECTION
-        SpeakerTopAppBar(
-            title = "Speakers",
-            onMenuClick = onMenuClick
-        )
-
-        // MAIN CONTENT
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 16.dp)
+            modifier = Modifier.fillMaxSize()
         ) {
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // SEARCH BAR STYLE BUTTON FOR SPEAKER CATALOG
-            SpeakerCatalogButton(
-                onClick = onSpeakerCatalogClick
+            // TOP BAR SECTION
+            SpeakerTopAppBar(
+                title = "Speakers",
+                onMenuClick = onMenuClick,
+                isDarkTheme = isDarkTheme
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            // MAIN CONTENT
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp)
+            ) {
+                Spacer(modifier = Modifier.height(16.dp))
 
-            // YOUR SAVED SPEAKERS SECTION
-            SavedSpeakersSection()
+                // SEARCH BAR STYLE BUTTON FOR SPEAKER CATALOG
+                SpeakerCatalogButton(
+                    onClick = onSpeakerCatalogClick,
+                    isDarkTheme = isDarkTheme
+                )
 
-            Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(24.dp))
 
-            // RECENTS SECTION
-            RecentsSection()
+                // YOUR SAVED SPEAKERS SECTION
+                SavedSpeakersSection(
+                    savedSpeakers = savedSpeakers,
+                    isDarkTheme = isDarkTheme,
+                    onSpeakerClick = onChatClick,
+                    onAddClick = onSpeakerCatalogClick
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // RECENTS SECTION
+                RecentsSection(
+                    activeChats = activeChats,
+                    isDarkTheme = isDarkTheme,
+                    onChatClick = onChatClick
+                )
+            }
         }
     }
 }
@@ -76,7 +122,8 @@ fun SpeakerHome(
 @Composable
 private fun SpeakerTopAppBar(
     title: String,
-    onMenuClick: () -> Unit
+    onMenuClick: () -> Unit,
+    isDarkTheme: Boolean
 ) {
     Row(
         modifier = Modifier
@@ -92,7 +139,7 @@ private fun SpeakerTopAppBar(
             Icon(
                 imageVector = Icons.Default.Menu,
                 contentDescription = "Open menu",
-                tint = MaterialTheme.colorScheme.secondary,
+                tint = if (isDarkTheme) CyanDarkMode else CyanLightMode,
                 modifier = Modifier.size(48.dp)
             )
         }
@@ -102,7 +149,7 @@ private fun SpeakerTopAppBar(
         // TITLE
         Text(
             text = title,
-            color = MaterialTheme.colorScheme.secondary,
+            color = if (isDarkTheme) CyanDarkMode else CyanLightMode,
             fontSize = 28.sp,
             fontWeight = FontWeight.Bold
         )
@@ -115,40 +162,47 @@ private fun SpeakerTopAppBar(
  */
 @Composable
 private fun SpeakerCatalogButton(
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    isDarkTheme: Boolean
 ) {
-    Card(
+    // BUTTON WITH ROUNDED BACKGROUND AND ICON (LIKE WEB VERSION)
+    Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(56.dp)
-            .clickable { onClick() },
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        shape = RoundedCornerShape(25.dp),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 4.dp
-        )
+            .clip(RoundedCornerShape(25.dp))
+            .background(if (isDarkTheme) CyanDarkMode else CyanLightMode)
+            .clickable { onClick() }
+            .padding(horizontal = 16.dp, vertical = 12.dp)
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 20.dp),
+            modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = "Browse Speaker Catalog",
-                color = BlueDarkMode,
-                fontSize = 16.sp
+                text = "Speaker Catalog",
+                color = if (isDarkTheme) WhiteGeneral else BlackGeneral,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold
             )
 
-            Icon(
-                imageVector = Icons.Default.Add,
-                contentDescription = "Add speakers",
-                tint = BlueDarkMode,
-                modifier = Modifier.size(24.dp)
-            )
+            // ICON WITH WHITE CIRCLE BACKGROUND
+            Box(
+                modifier = Modifier
+                    .size(36.dp)
+                    .background(
+                        color = WhiteGeneral,
+                        shape = CircleShape
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Open speaker catalog",
+                    tint = if (isDarkTheme) CyanDarkMode else CyanLightMode,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
         }
     }
 }
@@ -158,37 +212,67 @@ private fun SpeakerCatalogButton(
  * Section title and horizontal scrollable row of speaker circles
  */
 @Composable
-private fun SavedSpeakersSection() {
+private fun SavedSpeakersSection(
+    savedSpeakers: List<SavedSpeaker>,
+    isDarkTheme: Boolean,
+    onSpeakerClick: (Speaker) -> Unit,
+    onAddClick: () -> Unit
+) {
     Column {
-        // SECTION TITLE WITH BACKGROUND
+        // SECTION TITLE WITH BACKGROUND (LIKE WEB VERSION)
         Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .background(
-                    color = BlueDarkMode,
-                    shape = RoundedCornerShape(25.dp)
-                )
+                .clip(RoundedCornerShape(25.dp))
+                .background(if (isDarkTheme) CyanDarkMode else CyanLightMode)
                 .padding(horizontal = 16.dp, vertical = 12.dp)
         ) {
-            Text(
-                text = "Your Saved Speakers",
-                color = Color.White,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text(
+                    text = "Your Saved Speakers",
+                    color = if (isDarkTheme) WhiteGeneral else BlackGeneral,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                // DOT INDICATOR LIKE WEB VERSION
+                Box(
+                    modifier = Modifier
+                        .size(12.dp)
+                        .background(
+                            color = if (isDarkTheme) Color(0xFF0F766E) else Color(0xFF06B6D4),
+                            shape = CircleShape
+                        )
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // HORIZONTAL SCROLLABLE ROW OF SPEAKER CIRCLES
+        // HORIZONTAL SCROLLABLE ROW OF SPEAKER CIRCLES WITH AVATARS
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             contentPadding = PaddingValues(horizontal = 8.dp)
         ) {
-            items(getSavedSpeakers()) { speaker ->
-                SpeakerCircle(
-                    speaker = speaker,
-                    size = 84.dp
+            items(savedSpeakers) { savedSpeaker ->
+                SavedSpeakerAvatarCircle(
+                    savedSpeaker = savedSpeaker,
+                    size = 84.dp,
+                    onClick = {
+                        // Find the full speaker data and start chat
+                        val fullSpeaker = SpeakerData.getAllSpeakers().find { it.id == savedSpeaker.speakerId }
+                        fullSpeaker?.let { onSpeakerClick(it) }
+                    }
+                )
+            }
+
+            // ADD SPEAKER BUTTON (LIKE WEB VERSION)
+            item {
+                AddSpeakerButton(
+                    size = 84.dp,
+                    isDarkTheme = isDarkTheme,
+                    onClick = onAddClick
                 )
             }
         }
@@ -200,36 +284,74 @@ private fun SavedSpeakersSection() {
  * Section title and vertical scrollable list of chats
  */
 @Composable
-private fun RecentsSection() {
+private fun RecentsSection(
+    activeChats: List<Chat>,
+    isDarkTheme: Boolean,
+    onChatClick: (Speaker) -> Unit
+) {
     Column {
-        // SECTION TITLE WITH BACKGROUND
+        // SECTION TITLE WITH BACKGROUND (LIKE WEB VERSION)
         Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .background(
-                    color = RedDarkMode,
-                    shape = RoundedCornerShape(25.dp)
-                )
+                .clip(RoundedCornerShape(25.dp))
+                .background(RedDarkMode)
                 .padding(horizontal = 16.dp, vertical = 12.dp)
         ) {
-            Text(
-                text = "Recents",
-                color = Color.White,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text(
+                    text = "Recents",
+                    color = WhiteGeneral,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Icon(
+                    imageVector = Icons.Default.Refresh,
+                    contentDescription = "Refresh",
+                    tint = Color.White.copy(alpha = 0.8f),
+                    modifier = Modifier.size(16.dp)
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // VERTICAL SCROLLABLE LIST OF CHATS
-        LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            itemsIndexed(getRecentChats()) { index, chat ->
-                ChatListItem(
-                    chat = chat,
-                    cardColor = getChatCardColor(index)
+        // VERTICAL SCROLLABLE LIST OF CHATS WITH WEB-LIKE STYLING
+        if (activeChats.isNotEmpty()) {
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                itemsIndexed(activeChats.sortedByDescending { it.lastMessageTime }) { index, chat ->
+                    RecentChatCard(
+                        chat = chat,
+                        cardColor = getChatCardColor(index),
+                        isDarkTheme = isDarkTheme,
+                        onClick = {
+                            // Find the full speaker data and open chat
+                            val fullSpeaker = SpeakerData.getAllSpeakers().find { it.id == chat.speakerId }
+                            fullSpeaker?.let { onChatClick(it) }
+                        }
+                    )
+                }
+            }
+        } else {
+            // NO CHATS PLACEHOLDER
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "No recent chats",
+                    color = if (isDarkTheme) Color.Gray else Color.Gray,
+                    fontSize = 16.sp
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Start a conversation from the Speaker Catalog",
+                    color = if (isDarkTheme) Color.Gray else Color.Gray,
+                    fontSize = 14.sp
                 )
             }
         }
@@ -237,96 +359,196 @@ private fun RecentsSection() {
 }
 
 /**
- * SPEAKER CIRCLE COMPONENT
- * Individual speaker circle with different colors
+ * SAVED SPEAKER AVATAR CIRCLE COMPONENT
+ * Individual saved speaker circle with avatar and flag overlay (like web version)
  */
 @Composable
-private fun SpeakerCircle(
-    speaker: Speaker,
-    size: androidx.compose.ui.unit.Dp
+private fun SavedSpeakerAvatarCircle(
+    savedSpeaker: SavedSpeaker,
+    size: androidx.compose.ui.unit.Dp,
+    onClick: () -> Unit
 ) {
-    Box(
-        modifier = Modifier
-            .size(size)
-            .clip(CircleShape)
-            .background(speaker.color)
-            .clickable { /* TODO: Handle speaker selection */ },
-        contentAlignment = Alignment.Center
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
+        Box(
+            modifier = Modifier
+                .size(size)
+                .clickable { onClick() }
+        ) {
+            // FLAG BACKGROUND
+            AsyncImage(
+                model = "https://unpkg.com/circle-flags/flags/${getFlagCode(savedSpeaker.language)}.svg",
+                contentDescription = "${savedSpeaker.name}'s country flag",
+                modifier = Modifier
+                    .size(size)
+                    .clip(CircleShape),
+                contentScale = ContentScale.Crop
+            )
+
+            // AVATAR OVERLAY
+            AsyncImage(
+                model = "https://api.dicebear.com/9.x/avataaars/svg?seed=${savedSpeaker.avatarSeed}",
+                contentDescription = "Avatar of ${savedSpeaker.name}",
+                modifier = Modifier
+                    .size(size)
+                    .clip(CircleShape),
+                contentScale = ContentScale.Fit
+            )
+        }
+
+        // SPEAKER NAME
         Text(
-            text = speaker.initial,
-            color = Color.White,
-            fontSize = (size.value / 3).sp,
-            fontWeight = FontWeight.Bold
+            text = savedSpeaker.name,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = if (isSystemInDarkTheme()) Color(0xFFE5E7EB) else Color(0xFF374151)
         )
     }
 }
 
 /**
- * CHAT LIST ITEM COMPONENT
- * Individual chat item with speaker circle, name, message, and time
+ * ADD SPEAKER BUTTON COMPONENT
+ * Plus button to add new speakers (like web version)
  */
 @Composable
-private fun ChatListItem(
-    chat: ChatItem,
-    cardColor: Color = RedDarkMode
+private fun AddSpeakerButton(
+    size: androidx.compose.ui.unit.Dp,
+    isDarkTheme: Boolean,
+    onClick: () -> Unit
 ) {
-    Card(
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .size(size)
+                .clip(CircleShape)
+                .background(
+                    if (isDarkTheme) Color(0xFF374151).copy(alpha = 0.6f) else Color(0xFFE5E7EB)
+                )
+                .clickable { onClick() },
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Default.Add,
+                contentDescription = "Add speaker",
+                tint = if (isDarkTheme) Color(0xFF9CA3AF) else Color(0xFF6B7280),
+                modifier = Modifier.size(32.dp)
+            )
+        }
+
+        Text(
+            text = "Add",
+            fontSize = 14.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = if (isDarkTheme) Color(0xFFD1D5DB) else Color(0xFF6B7280)
+        )
+    }
+}
+
+/**
+ * RECENT CHAT CARD COMPONENT
+ * Individual chat card with gradient background and speaker avatar (like web version)
+ */
+@Composable
+private fun RecentChatCard(
+    chat: Chat,
+    cardColor: Color,
+    isDarkTheme: Boolean,
+    onClick: () -> Unit
+) {
+    Box(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { /* TODO: Handle chat selection */ },
-        colors = CardDefaults.cardColors(
-            containerColor = cardColor.copy(alpha = 0.1f)
-        ),
-        shape = RoundedCornerShape(22.dp),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 2.dp
-        )
+            .clip(RoundedCornerShape(16.dp))
+            .background(
+                brush = Brush.horizontalGradient(
+                    colors = listOf(
+                        cardColor,
+                        cardColor.copy(alpha = 0.8f)
+                    )
+                )
+            )
+            .clickable { onClick() }
+            .padding(12.dp)
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
+            modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // SPEAKER CIRCLE
-            SpeakerCircle(
-                speaker = chat.speaker,
-                size = 84.dp
-            )
+            // SPEAKER AVATAR WITH FLAG OVERLAY
+            Box(modifier = Modifier.size(56.dp)) {
+                // Find the saved speaker or create a temporary one
+                val savedSpeaker = ChatRepository.savedSpeakers.find { it.speakerId == chat.speakerId }
+                    ?: SavedSpeaker(chat.speakerId, chat.speakerName, "Unknown", "🌍", chat.speakerName)
 
-            Spacer(modifier = Modifier.width(16.dp))
+                AsyncImage(
+                    model = "https://unpkg.com/circle-flags/flags/${getFlagCode(savedSpeaker.language)}.svg",
+                    contentDescription = "${savedSpeaker.name}'s country flag",
+                    modifier = Modifier
+                        .size(56.dp)
+                        .clip(CircleShape),
+                    contentScale = ContentScale.Crop
+                )
+
+                AsyncImage(
+                    model = "https://api.dicebear.com/9.x/avataaars/svg?seed=${savedSpeaker.avatarSeed}",
+                    contentDescription = "Avatar of ${savedSpeaker.name}",
+                    modifier = Modifier
+                        .size(56.dp)
+                        .clip(CircleShape),
+                    contentScale = ContentScale.Fit
+                )
+            }
+
+            Spacer(modifier = Modifier.width(12.dp))
 
             // CHAT CONTENT
             Column(
                 modifier = Modifier.weight(1f)
             ) {
                 Text(
-                    text = chat.chatName,
-                    color = MaterialTheme.colorScheme.onSurface,
+                    text = chat.speakerName,
+                    color = Color.White,
                     fontSize = 16.sp,
-                    fontWeight = FontWeight.SemiBold
+                    fontWeight = FontWeight.Bold
                 )
 
                 Spacer(modifier = Modifier.height(4.dp))
 
                 Text(
-                    text = chat.latestMessage,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                    text = chat.lastMessage?.content ?: "No messages yet",
+                    color = Color.White.copy(alpha = 0.8f),
                     fontSize = 14.sp,
                     maxLines = 2
                 )
             }
 
-            Spacer(modifier = Modifier.width(8.dp))
+            // TIME AND UNREAD DOT
+            Column(
+                horizontalAlignment = Alignment.End,
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text(
+                    text = formatTimestamp(chat.lastMessageTime),
+                    color = Color.White.copy(alpha = 0.9f),
+                    fontSize = 12.sp
+                )
 
-            // DOT FOR UNANSWERED CHATS
-            Text(
-                text = if (chat.isAnswered) chat.time else "•",
-                color = if (chat.isAnswered) MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f) else cardColor,
-                fontSize = if (chat.isAnswered) 12.sp else 16.sp,
-                fontWeight = if (chat.isAnswered) FontWeight.Normal else FontWeight.Bold
-            )
+                if (chat.hasUnreadMessages) {
+                    Box(
+                        modifier = Modifier
+                            .size(12.dp)
+                            .background(
+                                color = Color.Black.copy(alpha = 0.5f),
+                                shape = CircleShape
+                            )
+                    )
+                }
+            }
         }
     }
 }
@@ -349,86 +571,36 @@ fun getChatCardColor(index: Int): Color {
 }
 
 /**
- * DATA CLASSES
+ * HELPER FUNCTIONS
  */
-data class Speaker(
-    val id: String,
-    val name: String,
-    val initial: String,
-    val color: Color
-)
+private fun formatTimestamp(timestamp: Long): String {
+    val now = System.currentTimeMillis()
+    val diff = now - timestamp
 
-data class ChatItem(
-    val id: String,
-    val chatName: String,
-    val latestMessage: String,
-    val time: String,
-    val speaker: Speaker,
-    val isAnswered: Boolean = true
-)
-
-/**
- * SAMPLE DATA FUNCTIONS
- */
-private fun getSavedSpeakers(): List<Speaker> {
-    return listOf(
-        Speaker("1", "Alex", "A", Color(0xFF6366F1)),
-        Speaker("2", "Sarah", "S", Color(0xFF10B981)),
-        Speaker("3", "Mike", "M", Color(0xFFF59E0B)),
-        Speaker("4", "Emma", "E", Color(0xFFEF4444)),
-        Speaker("5", "David", "D", Color(0xFF8B5CF6)),
-        Speaker("6", "Lisa", "L", Color(0xFF06B6D4)),
-        Speaker("7", "John", "J", Color(0xFFEC4899)),
-        Speaker("8", "Anna", "A", Color(0xFF84CC16)),
-        Speaker("9", "Tom", "T", Color(0xFFF97316)),
-        Speaker("10", "Kate", "K", Color(0xFF14B8A6))
-    )
+    return when {
+        diff < 60 * 1000 -> "now"
+        diff < 60 * 60 * 1000 -> "${diff / (60 * 1000)} min"
+        diff < 24 * 60 * 60 * 1000 -> "${diff / (60 * 60 * 1000)}h"
+        else -> "Today"
+    }
 }
 
-private fun getRecentChats(): List<ChatItem> {
-    val speakers = getSavedSpeakers()
-    return listOf(
-        ChatItem(
-            id = "1",
-            chatName = "English Practice",
-            latestMessage = "Great job on your pronunciation today! Let's work on the 'th' sound next time.",
-            time = "2:30 PM",
-            speaker = speakers[0],
-            isAnswered = false
-        ),
-        ChatItem(
-            id = "2",
-            chatName = "Spanish Conversation",
-            latestMessage = "¡Hola! ¿Cómo estás hoy? Let's practice some basic greetings.",
-            time = "1:45 PM",
-            speaker = speakers[1],
-            isAnswered = true
-        ),
-        ChatItem(
-            id = "3",
-            chatName = "Business English",
-            latestMessage = "We covered presentation skills today. Remember to practice your opening statements.",
-            time = "12:15 PM",
-            speaker = speakers[2],
-            isAnswered = false
-        ),
-        ChatItem(
-            id = "4",
-            chatName = "French Basics",
-            latestMessage = "Bonjour! Today we learned about French pronunciation. Keep practicing those vowels!",
-            time = "11:30 AM",
-            speaker = speakers[3],
-            isAnswered = true
-        ),
-        ChatItem(
-            id = "5",
-            chatName = "IELTS Preparation",
-            latestMessage = "Your speaking score is improving! Let's focus on task 2 writing next.",
-            time = "10:20 AM",
-            speaker = speakers[4],
-            isAnswered = false
-        )
-    )
+private fun getFlagCode(language: String): String {
+    return when (language) {
+        "German" -> "de"
+        "French" -> "fr"
+        "Spanish" -> "es"
+        "Hindi" -> "in"
+        "Italian" -> "it"
+        "Portuguese" -> "br"
+        "Japanese" -> "jp"
+        "Arabic" -> "ae"
+        "Russian" -> "ru"
+        "English" -> "gb"
+        "Irish" -> "ie"
+        "Chinese" -> "cn"
+        else -> "us"
+    }
 }
 
 /**

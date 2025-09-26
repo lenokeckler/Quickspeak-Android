@@ -8,10 +8,14 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.tooling.preview.Preview
+import com.quickspeak.mobile.data.ChatRepository
+import com.quickspeak.mobile.domain.model.Speaker
 import com.quickspeak.mobile.ui.components.navigation.NavigationDrawerContent
+import com.quickspeak.mobile.ui.screens.chat.ChatScreen
 import com.quickspeak.mobile.ui.screens.languages.LanguagesNavigation
 import com.quickspeak.mobile.ui.screens.test.AvatarScreen
 import com.quickspeak.mobile.ui.screens.speakers.SpeakerHome
+import com.quickspeak.mobile.ui.screens.speakers.SpeakerCatalogScreen
 import com.quickspeak.mobile.ui.theme.QuickSpeakTheme
 import kotlinx.coroutines.launch
 
@@ -59,6 +63,12 @@ fun QuickSpeakApp() {
     // currentScreen: Tracks which screen is currently displayed
     var currentScreen by remember { mutableStateOf("Tester") }
 
+    // speakerScreen: Tracks which speaker screen is currently displayed (Home, Catalog, or Chat)
+    var speakerScreen by remember { mutableStateOf("Home") }
+
+    // currentSpeaker: Tracks the currently selected speaker for chat
+    var currentSpeaker by remember { mutableStateOf<Speaker?>(null) }
+
     // scope: Needed to launch animations (like drawer sliding)
     // Coroutines handle animations without blocking the UI thread
     val scope = rememberCoroutineScope()
@@ -73,6 +83,11 @@ fun QuickSpeakApp() {
                 currentScreen = currentScreen,
                 onNavigate = { screen ->
                     currentScreen = screen
+                    // Reset speaker screen to Home when navigating away
+                    if (screen != "Speakers") {
+                        speakerScreen = "Home"
+                        currentSpeaker = null
+                    }
                     scope.launch {
                         drawerState.close()
                     }
@@ -82,13 +97,51 @@ fun QuickSpeakApp() {
         content = {                          // Main app content
             when (currentScreen) {
                 "Speakers" -> {
-                    SpeakerHome(
-                        onMenuClick = {
-                            scope.launch {
-                                drawerState.open()
+                    when (speakerScreen) {
+                        "Home" -> {
+                            SpeakerHome(
+                                onMenuClick = {
+                                    scope.launch {
+                                        drawerState.open()
+                                    }
+                                },
+                                onSpeakerCatalogClick = {
+                                    speakerScreen = "Catalog"
+                                },
+                                onChatClick = { speaker ->
+                                    currentSpeaker = speaker
+                                    speakerScreen = "Chat"
+                                }
+                            )
+                        }
+                        "Catalog" -> {
+                            SpeakerCatalogScreen(
+                                onBackClick = {
+                                    speakerScreen = "Home"
+                                },
+                                onSpeakerClick = { speaker ->
+                                    currentSpeaker = speaker
+                                    speakerScreen = "Chat"
+                                }
+                            )
+                        }
+                        "Chat" -> {
+                            currentSpeaker?.let { speaker ->
+                                ChatScreen(
+                                    speaker = speaker,
+                                    onMenuClick = {
+                                        scope.launch {
+                                            drawerState.open()
+                                        }
+                                    },
+                                    onBackClick = {
+                                        speakerScreen = "Home"
+                                        currentSpeaker = null
+                                    }
+                                )
                             }
                         }
-                    )
+                    }
                 }
                 "Languages" -> {
                     LanguagesNavigation(
