@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
 import coil3.compose.AsyncImage
 import com.quickspeak.mobile.data.ChatRepository
+import com.quickspeak.mobile.data.UserRepository
 import com.quickspeak.mobile.domain.model.*
 import com.quickspeak.mobile.ui.components.SpeakerCard
 import com.quickspeak.mobile.ui.theme.QuickSpeakTheme

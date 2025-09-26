@@ -64,7 +64,7 @@ fun QuickSpeakApp() {
     val drawerState = rememberDrawerState(DrawerValue.Closed)
 
     // currentScreen: Tracks which screen is currently displayed
-    var currentScreen by remember { mutableStateOf("Tester") }
+    var currentScreen by remember { mutableStateOf("Speakers") }
 
     // speakerScreen: Tracks which speaker screen is currently displayed (Home, Catalog, or Chat)
     var speakerScreen by remember { mutableStateOf("Home") }
@@ -178,7 +178,7 @@ fun QuickSpeakApp() {
                 "Profile" -> {
                     ProfileScreen(
                         onBackClick = {
-                            currentScreen = "Tester"
+                            currentScreen = "Speakers"
                         },
                         onSettingsClick = {
                             currentScreen = "Settings"
@@ -188,7 +188,7 @@ fun QuickSpeakApp() {
                 "Settings" -> {
                     SettingsScreen(
                         onBackClick = {
-                            currentScreen = "Tester"
+                            currentScreen = "Speakers"
                         }
                     )
                 }

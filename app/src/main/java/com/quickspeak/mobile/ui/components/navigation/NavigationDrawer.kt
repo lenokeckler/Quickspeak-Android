@@ -38,7 +38,6 @@ fun NavigationDrawerContent(
 
         // MENU ITEMS LIST
         val menuItems = listOf(
-            DrawerItem("Tester", Icons.Default.Person),
             DrawerItem("Speakers", Icons.Default.VolumeUp),
             DrawerItem("Dictionary", Icons.Default.Book),
             DrawerItem("Languages", Icons.Default.Language),

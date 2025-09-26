@@ -2,6 +2,7 @@ package com.quickspeak.mobile.ui.screens.chat
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
@@ -35,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.quickspeak.mobile.data.ChatRepository
+import com.quickspeak.mobile.data.UserRepository
 import com.quickspeak.mobile.domain.model.*
 import com.quickspeak.mobile.ui.theme.*
 
@@ -50,7 +52,8 @@ fun ChatScreen(
     onMenuClick: () -> Unit = {},
     onBackClick: () -> Unit = {}
 ) {
-    val isDarkTheme = isSystemInDarkTheme()
+    val systemDarkTheme = isSystemInDarkTheme()
+    val isDarkTheme = UserRepository.getEffectiveDarkMode(systemDarkTheme)
 
     // Get custom color if set, otherwise use speaker's default
     val customColor = ChatRepository.getSpeakerColor(speaker.id)
@@ -329,8 +332,11 @@ private fun ChatMessageBubble(
                 color = if (message.isFromUser) {
                     chatTheme.userBubbleBackground
                 } else {
-                    if (isDarkTheme) chatTheme.speakerBubbleBackground else chatTheme.speakerBubbleBackground.copy(alpha = 0.3f)
+                    if (isDarkTheme) chatTheme.speakerBubbleBackground else Color.White
                 },
+                border = if (!message.isFromUser && !isDarkTheme) {
+                    BorderStroke(1.dp, chatTheme.speakerBubbleBackground.copy(alpha = 0.3f))
+                } else null,
                 shadowElevation = 2.dp
             ) {
                 Text(

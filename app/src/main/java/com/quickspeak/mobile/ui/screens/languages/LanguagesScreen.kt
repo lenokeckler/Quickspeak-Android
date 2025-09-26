@@ -14,11 +14,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -37,6 +39,7 @@ fun LanguagesScreen(
     val languages by remember { derivedStateOf { LanguageRepository.learningLanguages } }
     var selectedLanguage by remember { mutableStateOf<Language?>(null) }
     var showLanguageOptionsDialog by remember { mutableStateOf(false) }
+    var showRemoveConfirmationDialog by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -167,12 +170,27 @@ fun LanguagesScreen(
                 selectedLanguage = null
             },
             onRemove = {
-                LanguageRepository.removeLanguageFromLearning(selectedLanguage!!)
                 showLanguageOptionsDialog = false
-                selectedLanguage = null
+                showRemoveConfirmationDialog = true
             },
             onDismiss = {
                 showLanguageOptionsDialog = false
+                selectedLanguage = null
+            }
+        )
+    }
+
+    // CONFIRMATION DIALOG FOR LANGUAGE REMOVAL
+    if (showRemoveConfirmationDialog && selectedLanguage != null) {
+        LanguageRemovalConfirmationDialog(
+            language = selectedLanguage!!,
+            onConfirm = {
+                LanguageRepository.removeLanguageFromLearning(selectedLanguage!!)
+                showRemoveConfirmationDialog = false
+                selectedLanguage = null
+            },
+            onDismiss = {
+                showRemoveConfirmationDialog = false
                 selectedLanguage = null
             }
         )
@@ -428,6 +446,113 @@ private fun LanguageOptionsDialog(
                     }
 
                     Spacer(modifier = Modifier.height(8.dp))
+                }
+            }
+        }
+    }
+}
+
+/**
+ * LANGUAGE REMOVAL CONFIRMATION DIALOG
+ * Shows warning about removing language and its impact on chats/speakers
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun LanguageRemovalConfirmationDialog(
+    language: Language,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    BasicAlertDialog(
+        onDismissRequest = onDismiss
+    ) {
+        Surface(
+            shape = RoundedCornerShape(28.dp),
+            color = MaterialTheme.colorScheme.background,
+            tonalElevation = 8.dp,
+            modifier = Modifier.widthIn(min = 300.dp, max = 400.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                // WARNING ICON
+                Icon(
+                    imageVector = Icons.Default.Warning,
+                    contentDescription = "Warning",
+                    tint = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.size(48.dp)
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // TITLE
+                Text(
+                    text = "Remove ${language.name}?",
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // WARNING MESSAGE
+                Text(
+                    text = "Removing this language will:\n\n• Hide all chats in ${language.name}\n• Hide all ${language.name} speakers from your saved speakers\n• Remove access to ${language.name} content\n\nThis action cannot be undone.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
+                    textAlign = TextAlign.Start,
+                    lineHeight = 20.sp
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // BUTTONS
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    // CANCEL BUTTON
+                    OutlinedButton(
+                        onClick = onDismiss,
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(48.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = MaterialTheme.colorScheme.onSurface
+                        ),
+                        border = BorderStroke(
+                            width = 1.dp,
+                            color = MaterialTheme.colorScheme.outline
+                        ),
+                        shape = RoundedCornerShape(24.dp)
+                    ) {
+                        Text(
+                            text = "Cancel",
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+
+                    // CONFIRM BUTTON
+                    Button(
+                        onClick = onConfirm,
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(48.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.error
+                        ),
+                        shape = RoundedCornerShape(24.dp)
+                    ) {
+                        Text(
+                            text = "Remove",
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
             }
         }

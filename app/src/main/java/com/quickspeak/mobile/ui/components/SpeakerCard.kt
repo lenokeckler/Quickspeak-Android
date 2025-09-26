@@ -76,7 +76,7 @@ fun SpeakerCard(
         ),
         border = if (isDarkTheme) null else androidx.compose.foundation.BorderStroke(
             width = 4.dp,
-            color = speaker.colorClasses.borderColor
+            color = speaker.colorClasses.cardBackground
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
     ) {

@@ -16,6 +16,8 @@ uiTextGoogleFonts = "1.9.1"
 coilCompose = "3.2.0"
 coilNetworkOkhttp = "3.2.0"
 navigationCompose = "2.9.4"
+animation = "1.9.2"
+foundation = "1.10.0-alpha04"
 
 [libraries]
 androidx-activity-compose-v182 = { module = "androidx.activity:activity-compose", version.ref = "activityComposeVersion" }
@@ -40,6 +42,8 @@ androidx-compose-ui-text-google-fonts = { group = "androidx.compose.ui", name = 
 coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coilCompose" }
 coil-network-okhttp = { group = "io.coil-kt.coil3", name = "coil-network-okhttp", version.ref = "coilNetworkOkhttp" }
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
+androidx-compose-animation = { group = "androidx.compose.animation", name = "animation", version.ref = "animation" }
+androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "foundation" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

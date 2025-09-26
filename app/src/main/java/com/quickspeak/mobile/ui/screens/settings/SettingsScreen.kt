@@ -189,21 +189,6 @@ private fun AccountSettingsSection(
             onClick = { /* TODO: Edit email */ }
         )
 
-        SettingsItem(
-            icon = Icons.Default.Language,
-            title = "Languages",
-            subtitle = "${userProfile.learningLanguages.size} learning",
-            isDarkTheme = isDarkTheme,
-            onClick = { /* TODO: Navigate to languages */ }
-        )
-
-        SettingsItem(
-            icon = Icons.Default.Security,
-            title = "Privacy & Security",
-            subtitle = "Manage your data",
-            isDarkTheme = isDarkTheme,
-            onClick = { /* TODO: Privacy settings */ }
-        )
     }
 }
 
@@ -268,18 +253,6 @@ private fun AppearanceSettingsSection(
             )
         }
 
-        SettingsItemWithDropdown(
-            icon = Icons.Default.FormatSize,
-            title = "Font Size",
-            subtitle = appSettings.fontSize.displayName,
-            options = FontSize.values().map { it.displayName },
-            selectedOption = appSettings.fontSize.displayName,
-            onOptionSelected = { option ->
-                val fontSize = FontSize.values().find { it.displayName == option } ?: FontSize.MEDIUM
-                UserRepository.updateFontSize(fontSize)
-            },
-            isDarkTheme = isDarkTheme
-        )
     }
 }
 
@@ -314,14 +287,6 @@ private fun NotificationSettingsSection(
             enabled = appSettings.notificationsEnabled
         )
 
-        SettingsItemWithSwitch(
-            icon = Icons.Default.Vibration,
-            title = "Haptic Feedback",
-            subtitle = "Vibration for interactions",
-            isChecked = appSettings.hapticFeedbackEnabled,
-            onCheckedChange = { UserRepository.updateHapticFeedback(it) },
-            isDarkTheme = isDarkTheme
-        )
     }
 }
 
@@ -338,31 +303,11 @@ private fun LearningSettingsSection(
         isDarkTheme = isDarkTheme
     ) {
         SettingsItemWithSwitch(
-            icon = Icons.Default.VolumeUp,
-            title = "Sound Effects",
-            subtitle = "Audio feedback for actions",
-            isChecked = appSettings.soundEnabled,
-            onCheckedChange = { UserRepository.updateSoundSettings(it) },
-            isDarkTheme = isDarkTheme
-        )
-
-        SettingsItemWithSwitch(
             icon = Icons.Default.PlayArrow,
             title = "Autoplay Audio",
             subtitle = "Automatically play speaker messages",
             isChecked = appSettings.autoplayAudio,
             onCheckedChange = { UserRepository.updateSoundSettings(appSettings.soundEnabled, it) },
-            isDarkTheme = isDarkTheme,
-            enabled = appSettings.soundEnabled
-        )
-
-        SettingsItemWithSlider(
-            icon = Icons.Default.Speed,
-            title = "Speech Speed",
-            subtitle = "${(appSettings.speechSpeed * 100).toInt()}%",
-            value = appSettings.speechSpeed,
-            onValueChange = { UserRepository.updateSpeechSpeed(it) },
-            valueRange = 0.5f..2.0f,
             isDarkTheme = isDarkTheme
         )
     }

@@ -28,8 +28,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.quickspeak.mobile.data.ChatRepository
+import com.quickspeak.mobile.data.UserRepository
 import com.quickspeak.mobile.domain.model.*
 import kotlinx.coroutines.delay
+import com.quickspeak.mobile.data.LanguageRepository
 
 /**
  * SPEAKER HOME SCREEN
@@ -41,14 +43,26 @@ fun SpeakerHome(
     onSpeakerCatalogClick: () -> Unit = {},
     onChatClick: (Speaker) -> Unit = {}
 ) {
-    val isDarkTheme = isSystemInDarkTheme()
+    val systemDarkTheme = isSystemInDarkTheme()
+    val isDarkTheme = UserRepository.getEffectiveDarkMode(systemDarkTheme)
 
     // Loading state for async operations
     var isLoading by remember { mutableStateOf(true) }
 
-    // Get data from ChatRepository
-    val savedSpeakers = remember { ChatRepository.savedSpeakers }
-    val activeChats = remember { ChatRepository.activeChats }
+    // Get data from ChatRepository and filter by enabled languages
+    val enabledLanguages = remember { LanguageRepository.learningLanguages.map { it.name }.toSet() }
+    val savedSpeakers = remember(enabledLanguages) {
+        ChatRepository.savedSpeakers.filter { savedSpeaker ->
+            enabledLanguages.contains(savedSpeaker.language)
+        }
+    }
+    val activeChats = remember(enabledLanguages) {
+        ChatRepository.activeChats.filter { chat ->
+            // Find the speaker for this chat and check if their language is enabled
+            val speaker = SpeakerData.getAllSpeakers().find { it.id == chat.speakerId }
+            speaker?.let { enabledLanguages.contains(it.language) } ?: false
+        }
+    }
 
     // Simulate loading for async operations (avatars, flags)
     LaunchedEffect(Unit) {
@@ -150,13 +164,13 @@ private fun LoadingScreen(isDarkTheme: Boolean) {
         ) {
             CircularProgressIndicator(
                 modifier = Modifier.size(64.dp),
-                color = if (isDarkTheme) CyanDarkMode else CyanLightMode,
+                color = if (isDarkTheme) BlueDarkMode else BlueLightMode,
                 strokeWidth = 6.dp
             )
 
             Text(
                 text = "Loading Speakers...",
-                color = if (isDarkTheme) CyanDarkMode else CyanLightMode,
+                color = if (isDarkTheme) BlueDarkMode else BlueLightMode,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Medium
             )
@@ -188,7 +202,7 @@ private fun SpeakerTopAppBar(
             Icon(
                 imageVector = Icons.Default.Menu,
                 contentDescription = "Open menu",
-                tint = if (isDarkTheme) CyanDarkMode else CyanLightMode,
+                tint = if (isDarkTheme) BlueDarkMode else BlueLightMode,
                 modifier = Modifier.size(48.dp)
             )
         }
@@ -198,7 +212,7 @@ private fun SpeakerTopAppBar(
         // TITLE
         Text(
             text = title,
-            color = if (isDarkTheme) CyanDarkMode else CyanLightMode,
+            color = if (isDarkTheme) BlueDarkMode else BlueLightMode,
             fontSize = 28.sp,
             fontWeight = FontWeight.Bold
         )
@@ -219,7 +233,7 @@ private fun SpeakerCatalogButton(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(25.dp))
-            .background(if (isDarkTheme) CyanDarkMode else CyanLightMode)
+            .background(if (isDarkTheme) BlueDarkMode else BlueLightMode)
             .clickable { onClick() }
             .padding(horizontal = 16.dp, vertical = 12.dp)
     ) {
@@ -248,7 +262,7 @@ private fun SpeakerCatalogButton(
                 Icon(
                     imageVector = Icons.Default.Add,
                     contentDescription = "Open speaker catalog",
-                    tint = if (isDarkTheme) CyanDarkMode else CyanLightMode,
+                    tint = if (isDarkTheme) BlueDarkMode else BlueLightMode,
                     modifier = Modifier.size(24.dp)
                 )
             }
@@ -272,7 +286,7 @@ private fun SavedSpeakersSection(
         Box(
             modifier = Modifier
                 .clip(RoundedCornerShape(25.dp))
-                .background(if (isDarkTheme) CyanDarkMode else CyanLightMode)
+                .background(if (isDarkTheme) BlueDarkMode else BlueLightMode)
                 .padding(horizontal = 16.dp, vertical = 12.dp)
         ) {
             Row(
@@ -373,9 +387,13 @@ private fun RecentsSection(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 itemsIndexed(activeChats.sortedByDescending { it.lastMessageTime }) { index, chat ->
+                    // Get custom color for this speaker if set, otherwise use default pattern
+                    val customColor = ChatRepository.getSpeakerColor(chat.speakerId)
+                    val cardColor = customColor ?: getChatCardColor(index)
+
                     RecentChatCard(
                         chat = chat,
-                        cardColor = getChatCardColor(index),
+                        cardColor = cardColor,
                         isDarkTheme = isDarkTheme,
                         onClick = {
                             // Find the full speaker data and open chat
@@ -613,7 +631,7 @@ fun getChatCardColor(index: Int): Color {
     return when (index % 4) {
         0 -> RedDarkMode
         1 -> YellowDarkMode
-        2 -> CyanDarkMode
+        2 -> BlueDarkMode
         3 -> BlueDarkMode
         else -> RedDarkMode
     }

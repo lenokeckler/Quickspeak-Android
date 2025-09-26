@@ -46,7 +46,8 @@ fun ProfileScreen(
     onBackClick: () -> Unit = {},
     onSettingsClick: () -> Unit = {}
 ) {
-    val isDarkTheme = isSystemInDarkTheme()
+    val systemDarkTheme = isSystemInDarkTheme()
+    val isDarkTheme = UserRepository.getEffectiveDarkMode(systemDarkTheme)
     val userProfile = UserRepository.userProfile
     val learningStats = UserRepository.learningStats
     val achievements = UserRepository.achievements
