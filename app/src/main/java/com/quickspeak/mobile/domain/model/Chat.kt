@@ -69,16 +69,17 @@ data class ChatTheme(
     val gradientEnd: androidx.compose.ui.graphics.Color
 ) {
     companion object {
-        fun fromSpeaker(speaker: Speaker): ChatTheme {
+        fun fromSpeaker(speaker: Speaker, customColor: androidx.compose.ui.graphics.Color? = null): ChatTheme {
+            val themeColor = customColor ?: speaker.colorClasses.background
             return ChatTheme(
                 speakerId = speaker.id,
-                headerBackground = speaker.colorClasses.background,
-                inputBackground = speaker.colorClasses.background,
-                speakerBubbleBackground = speaker.colorClasses.background,
+                headerBackground = themeColor,
+                inputBackground = themeColor,
+                speakerBubbleBackground = themeColor,
                 userBubbleBackground = androidx.compose.ui.graphics.Color(0xFF0EA5E9), // Sky blue for user
-                textColor = speaker.colorClasses.textColor,
+                textColor = if (customColor != null) androidx.compose.ui.graphics.Color.White else speaker.colorClasses.textColor,
                 gradientStart = androidx.compose.ui.graphics.Color(0xFF232323), // Dark theme gradient
-                gradientEnd = speaker.colorClasses.background.copy(alpha = 0.3f)
+                gradientEnd = themeColor.copy(alpha = 0.3f)
             )
         }
     }

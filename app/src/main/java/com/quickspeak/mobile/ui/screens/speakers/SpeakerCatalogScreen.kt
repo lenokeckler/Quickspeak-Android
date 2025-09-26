@@ -74,14 +74,17 @@ fun SpeakerCatalogScreen(
         mutableIntStateOf(-1)
     }
 
-    // COMPUTED VALUES - Show speakers for languages the user has, filtered by active selections
+    // COMPUTED VALUES - Show speakers for languages the user has, filtered by active selections and excluding saved speakers
     val filteredSpeakers = remember(languageFilters) {
         val activeLanguages = languageFilters.filter { it.isActive }.map { it.name }
+        val savedSpeakerIds = ChatRepository.savedSpeakers.map { it.speakerId }.toSet()
+
         val availableSpeakers = SpeakerData.getAllSpeakers().filter { speaker ->
             // Include speakers for any language the user is learning (including native)
+            // BUT exclude speakers that are already saved
             LanguageRepository.learningLanguages.any { userLang ->
-                mapLanguageNames(userLang.name) == speaker.language
-            }
+                userLang.name == speaker.language
+            } && !savedSpeakerIds.contains(speaker.id)
         }
 
         if (activeLanguages.isEmpty()) {
@@ -114,6 +117,8 @@ fun SpeakerCatalogScreen(
                     )
                 }
             )
+            .statusBarsPadding()
+            .navigationBarsPadding()
     ) {
         Column(
             modifier = Modifier
@@ -301,13 +306,12 @@ private fun LanguageFilterChip(
 private fun getLanguageFiltersFromRepository(): List<LanguageFilter> {
     return LanguageRepository.learningLanguages
         .mapNotNull { userLanguage ->
-            val speakerLanguageName = mapLanguageNames(userLanguage.name)
-            val flagEmoji = getLanguageFlagEmoji(speakerLanguageName)
+            val flagEmoji = getLanguageFlagEmoji(userLanguage.name)
 
             // Only include if we have speakers for this language
-            if (SpeakerData.getAllSpeakers().any { it.language == speakerLanguageName }) {
+            if (SpeakerData.getAllSpeakers().any { it.language == userLanguage.name }) {
                 LanguageFilter(
-                    name = speakerLanguageName,
+                    name = userLanguage.name,
                     flag = flagEmoji,
                     isActive = !userLanguage.isNative // Native language starts inactive, others start active
                 )
@@ -317,32 +321,6 @@ private fun getLanguageFiltersFromRepository(): List<LanguageFilter> {
         }
 }
 
-/**
- * Maps repository language names to speaker data language names
- */
-private fun mapLanguageNames(repositoryLanguageName: String): String {
-    return when (repositoryLanguageName) {
-        "Deutsch" -> "German"
-        "Español" -> "Spanish"
-        "Français" -> "French"
-        "Português" -> "Portuguese"
-        "漢語" -> "Chinese"
-        "Русский" -> "Russian"
-        "العربية" -> "Arabic"
-        "日本語" -> "Japanese"
-        "Italiano" -> "Italian"
-        "English" -> "English"
-        "한국어" -> "Korean"
-        "Nederlands" -> "Dutch"
-        "Polski" -> "Polish"
-        "Türkçe" -> "Turkish"
-        "Svenska" -> "Swedish"
-        "Norsk" -> "Norwegian"
-        "Dansk" -> "Danish"
-        "Suomi" -> "Finnish"
-        else -> repositoryLanguageName
-    }
-}
 
 /**
  * Gets flag emoji for speaker language names

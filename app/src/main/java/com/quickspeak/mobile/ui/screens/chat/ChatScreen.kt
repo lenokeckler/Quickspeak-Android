@@ -8,8 +8,11 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -22,7 +25,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -45,7 +51,10 @@ fun ChatScreen(
     onBackClick: () -> Unit = {}
 ) {
     val isDarkTheme = isSystemInDarkTheme()
-    val chatTheme = ChatTheme.fromSpeaker(speaker)
+
+    // Get custom color if set, otherwise use speaker's default
+    val customColor = ChatRepository.getSpeakerColor(speaker.id)
+    val chatTheme = ChatTheme.fromSpeaker(speaker, customColor)
 
     // Get or create chat
     var currentChat by remember {
@@ -91,6 +100,8 @@ fun ChatScreen(
                     )
                 }
             )
+            .statusBarsPadding()
+            .navigationBarsPadding()
     ) {
         Column(
             modifier = Modifier.fillMaxSize()
@@ -101,7 +112,7 @@ fun ChatScreen(
                 chatTheme = chatTheme,
                 isDarkTheme = isDarkTheme,
                 onMenuClick = onMenuClick,
-                onAvatarClick = { showSpeakerProfileModal = true }
+                onHeaderClick = { showSpeakerProfileModal = true }
             )
 
             // MESSAGES LIST
@@ -149,7 +160,11 @@ fun ChatScreen(
             speaker = speaker,
             chatTheme = chatTheme,
             isDarkTheme = isDarkTheme,
-            onDismiss = { showSpeakerProfileModal = false }
+            onDismiss = { showSpeakerProfileModal = false },
+            onColorChange = { color ->
+                ChatRepository.setSpeakerColor(speaker.id, color)
+                // Refresh the chat theme would happen on next recomposition
+            }
         )
     }
 
@@ -170,7 +185,8 @@ fun ChatScreen(
 
 /**
  * CHAT HEADER COMPONENT
- * Top section with menu button, speaker info, and avatar
+ * Top section with menu button, bookmark, speaker info, and avatar
+ * Clickable except for menu and bookmark buttons
  */
 @Composable
 private fun ChatHeader(
@@ -178,7 +194,7 @@ private fun ChatHeader(
     chatTheme: ChatTheme,
     isDarkTheme: Boolean,
     onMenuClick: () -> Unit,
-    onAvatarClick: () -> Unit
+    onHeaderClick: () -> Unit
 ) {
     Surface(
         modifier = Modifier
@@ -195,19 +211,37 @@ private fun ChatHeader(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // MENU BUTTON
-            IconButton(onClick = onMenuClick) {
-                Icon(
-                    imageVector = Icons.Default.Menu,
-                    contentDescription = "Menu",
-                    tint = if (isDarkTheme) chatTheme.textColor else Color.Black,
-                    modifier = Modifier.size(32.dp)
-                )
+            // LEFT SIDE: MENU AND BOOKMARK BUTTONS
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                IconButton(onClick = onMenuClick) {
+                    Icon(
+                        imageVector = Icons.Default.Menu,
+                        contentDescription = "Menu",
+                        tint = if (isDarkTheme) chatTheme.textColor else Color.Black,
+                        modifier = Modifier.size(32.dp)
+                    )
+                }
+
+                IconButton(onClick = { /* TODO: Bookmark functionality */ }) {
+                    Icon(
+                        imageVector = Icons.Default.Bookmark,
+                        contentDescription = "Bookmark",
+                        tint = if (isDarkTheme) chatTheme.textColor else Color.Black,
+                        modifier = Modifier.size(28.dp)
+                    )
+                }
             }
 
-            // SPEAKER INFO (CENTER)
+            // CENTER: SPEAKER INFO (CLICKABLE)
             Column(
-                horizontalAlignment = Alignment.CenterHorizontally
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .weight(1f)
+                    .clickable { onHeaderClick() }
+                    .padding(horizontal = 16.dp)
             ) {
                 Text(
                     text = speaker.name,
@@ -222,12 +256,12 @@ private fun ChatHeader(
                 )
             }
 
-            // SPEAKER AVATAR (CLICKABLE)
+            // RIGHT SIDE: SPEAKER AVATAR (CLICKABLE)
             Box(
                 modifier = Modifier
                     .size(56.dp)
                     .clip(CircleShape)
-                    .clickable { onAvatarClick() }
+                    .clickable { onHeaderClick() }
             ) {
                 // Flag background
                 AsyncImage(
@@ -361,7 +395,8 @@ private fun ChatMessageBubble(
 
 /**
  * CHAT INPUT BAR COMPONENT
- * Bottom input area with send functionality
+ * Bottom input area with voice, text input, and send functionality
+ * Multi-line text field with up to 5 lines before scrolling
  */
 @Composable
 private fun ChatInputBar(
@@ -383,21 +418,14 @@ private fun ChatInputBar(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically,
+            verticalAlignment = Alignment.Bottom,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // BOOKMARK BUTTON
-            IconButton(onClick = { /* TODO: Bookmark functionality */ }) {
-                Icon(
-                    imageVector = Icons.Default.Bookmark,
-                    contentDescription = "Bookmark",
-                    tint = if (isDarkTheme) chatTheme.textColor else Color.Black,
-                    modifier = Modifier.size(32.dp)
-                )
-            }
-
             // MIC BUTTON
-            IconButton(onClick = { /* TODO: Voice input */ }) {
+            IconButton(
+                onClick = { /* TODO: Voice input */ },
+                modifier = Modifier.padding(bottom = 4.dp)
+            ) {
                 Icon(
                     imageVector = Icons.Default.Mic,
                     contentDescription = "Voice input",
@@ -406,7 +434,7 @@ private fun ChatInputBar(
                 )
             }
 
-            // TEXT INPUT FIELD
+            // MULTI-LINE TEXT INPUT FIELD
             OutlinedTextField(
                 value = messageText,
                 onValueChange = onMessageChange,
@@ -414,7 +442,8 @@ private fun ChatInputBar(
                 placeholder = {
                     Text(
                         text = "Type your message",
-                        color = if (isDarkTheme) Color.Gray else Color.Gray
+                        color = if (isDarkTheme) Color.Gray else Color.Gray,
+                        fontSize = 14.sp
                     )
                 },
                 colors = OutlinedTextFieldDefaults.colors(
@@ -426,11 +455,20 @@ private fun ChatInputBar(
                     unfocusedTextColor = if (isDarkTheme) Color.White else Color.Black
                 ),
                 shape = RoundedCornerShape(12.dp),
-                singleLine = true
+                textStyle = LocalTextStyle.current.copy(fontSize = 14.sp),
+                keyboardOptions = KeyboardOptions(
+                    capitalization = KeyboardCapitalization.Sentences,
+                    imeAction = ImeAction.Default
+                ),
+                maxLines = 5,
+                minLines = 1
             )
 
             // SEND BUTTON
-            IconButton(onClick = onSendClick) {
+            IconButton(
+                onClick = onSendClick,
+                modifier = Modifier.padding(bottom = 4.dp)
+            ) {
                 Icon(
                     imageVector = Icons.Default.Send,
                     contentDescription = "Send",

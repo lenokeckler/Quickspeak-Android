@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.quickspeak.mobile.data.ChatRepository
 import com.quickspeak.mobile.domain.model.*
+import kotlinx.coroutines.delay
 
 /**
  * SPEAKER HOME SCREEN
@@ -42,9 +43,18 @@ fun SpeakerHome(
 ) {
     val isDarkTheme = isSystemInDarkTheme()
 
+    // Loading state for async operations
+    var isLoading by remember { mutableStateOf(true) }
+
     // Get data from ChatRepository
     val savedSpeakers = remember { ChatRepository.savedSpeakers }
     val activeChats = remember { ChatRepository.activeChats }
+
+    // Simulate loading for async operations (avatars, flags)
+    LaunchedEffect(Unit) {
+        delay(1500) // Give time for images to load
+        isLoading = false
+    }
 
     // MAIN CONTAINER WITH GRADIENT BACKGROUND
     Box(
@@ -67,10 +77,16 @@ fun SpeakerHome(
                     )
                 }
             )
+            .statusBarsPadding()
+            .navigationBarsPadding()
     ) {
-        Column(
-            modifier = Modifier.fillMaxSize()
-        ) {
+        if (isLoading) {
+            // LOADING SCREEN
+            LoadingScreen(isDarkTheme = isDarkTheme)
+        } else {
+            Column(
+                modifier = Modifier.fillMaxSize()
+            ) {
             // TOP BAR SECTION
             SpeakerTopAppBar(
                 title = "Speakers",
@@ -111,6 +127,39 @@ fun SpeakerHome(
                     onChatClick = onChatClick
                 )
             }
+        }
+        }
+    }
+}
+
+/**
+ * LOADING SCREEN COMPONENT
+ * Shows a spinning loader while avatars and flags are loading
+ */
+@Composable
+private fun LoadingScreen(isDarkTheme: Boolean) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(64.dp),
+                color = if (isDarkTheme) CyanDarkMode else CyanLightMode,
+                strokeWidth = 6.dp
+            )
+
+            Text(
+                text = "Loading Speakers...",
+                color = if (isDarkTheme) CyanDarkMode else CyanLightMode,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Medium
+            )
         }
     }
 }

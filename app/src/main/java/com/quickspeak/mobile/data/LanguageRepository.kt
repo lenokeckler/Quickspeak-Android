@@ -10,25 +10,26 @@ object LanguageRepository {
 
     private val _allAvailableLanguages = listOf(
         Language("English", "US"),
-        Language("Português", "BR"),
-        Language("Deutsch", "DE"),
-        Language("Español", "ES"),
+        Language("Portuguese", "BR"),
+        Language("German", "DE"),
+        Language("Spanish", "ES"),
         Language("Hindi", "IN"),
-        Language("Français", "FR"),
-        Language("漢語", "CN"),
-        Language("Русский", "RU"),
-        Language("العربية", "AE"),
-        Language("日本語", "JP"),
-        Language("한국어", "KR"),
-        Language("Italiano", "IT"),
-        Language("Nederlands", "NL"),
-        Language("Português", "PT"),
-        Language("Polski", "PL"),
-        Language("Türkçe", "TR"),
-        Language("Svenska", "SE"),
-        Language("Norsk", "NO"),
-        Language("Dansk", "DK"),
-        Language("Suomi", "FI")
+        Language("French", "FR"),
+        Language("Chinese", "CN"),
+        Language("Russian", "RU"),
+        Language("Arabic", "AE"),
+        Language("Japanese", "JP"),
+        Language("Korean", "KR"),
+        Language("Italian", "IT"),
+        Language("Dutch", "NL"),
+        Language("Portuguese", "PT"),
+        Language("Polish", "PL"),
+        Language("Turkish", "TR"),
+        Language("Swedish", "SE"),
+        Language("Norwegian", "NO"),
+        Language("Danish", "DK"),
+        Language("Finnish", "FI"),
+        Language("Irish", "IE")
     )
 
     val availableLanguages: List<Language>
@@ -40,8 +41,8 @@ object LanguageRepository {
         _learningLanguages.addAll(
             listOf(
                 Language("English", "US", true),
-                Language("Português", "BR"),
-                Language("Deutsch", "DE")
+                Language("Portuguese", "BR"),
+                Language("German", "DE")
             )
         )
     }

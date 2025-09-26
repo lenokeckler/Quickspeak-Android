@@ -3,6 +3,7 @@ package com.quickspeak.mobile
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -16,6 +17,8 @@ import com.quickspeak.mobile.ui.screens.languages.LanguagesNavigation
 import com.quickspeak.mobile.ui.screens.test.AvatarScreen
 import com.quickspeak.mobile.ui.screens.speakers.SpeakerHome
 import com.quickspeak.mobile.ui.screens.speakers.SpeakerCatalogScreen
+import com.quickspeak.mobile.ui.screens.profile.ProfileScreen
+import com.quickspeak.mobile.ui.screens.settings.SettingsScreen
 import com.quickspeak.mobile.ui.theme.QuickSpeakTheme
 import kotlinx.coroutines.launch
 
@@ -95,6 +98,26 @@ fun QuickSpeakApp() {
             )
         },
         content = {                          // Main app content
+            // BACK NAVIGATION HANDLING
+            BackHandler(
+                enabled = when (currentScreen) {
+                    "Speakers" -> speakerScreen != "Home"
+                    else -> false
+                }
+            ) {
+                when (currentScreen) {
+                    "Speakers" -> {
+                        when (speakerScreen) {
+                            "Catalog" -> speakerScreen = "Home"
+                            "Chat" -> {
+                                speakerScreen = "Home"
+                                currentSpeaker = null
+                            }
+                        }
+                    }
+                }
+            }
+
             when (currentScreen) {
                 "Speakers" -> {
                     when (speakerScreen) {
@@ -149,6 +172,23 @@ fun QuickSpeakApp() {
                             scope.launch {
                                 drawerState.open()
                             }
+                        }
+                    )
+                }
+                "Profile" -> {
+                    ProfileScreen(
+                        onBackClick = {
+                            currentScreen = "Tester"
+                        },
+                        onSettingsClick = {
+                            currentScreen = "Settings"
+                        }
+                    )
+                }
+                "Settings" -> {
+                    SettingsScreen(
+                        onBackClick = {
+                            currentScreen = "Tester"
                         }
                     )
                 }

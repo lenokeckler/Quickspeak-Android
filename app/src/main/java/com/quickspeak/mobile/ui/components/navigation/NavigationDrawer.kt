@@ -61,14 +61,14 @@ fun NavigationDrawerContent(
 
         // BOTTOM MENU ITEMS
         DrawerMenuItem(
+            item = DrawerItem("Settings", Icons.Default.Settings),
+            isSelected = currentScreen == "Settings",
+            onClick = { onNavigate("Settings") }
+        )
+        DrawerMenuItem(
             item = DrawerItem("Logout", Icons.Default.ExitToApp),
             isSelected = false,
             onClick = { /* TODO: Handle logout */ }
-        )
-        DrawerMenuItem(
-            item = DrawerItem("Settings", Icons.Default.Settings),
-            isSelected = false,
-            onClick = { /* TODO: Handle settings */ }
         )
 
         Spacer(modifier = Modifier.height(20.dp))

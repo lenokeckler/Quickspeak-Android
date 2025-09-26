@@ -3,6 +3,7 @@ package com.quickspeak.mobile.data
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.Color
 import com.quickspeak.mobile.domain.model.*
 
 /**
@@ -19,6 +20,10 @@ object ChatRepository {
     // ACTIVE CHATS STATE
     private var _activeChats = mutableStateOf<List<Chat>>(getMockChats())
     val activeChats: List<Chat> by _activeChats
+
+    // SPEAKER COLORS STATE (for customization)
+    private var _speakerColors = mutableStateOf<Map<Int, Color>>(emptyMap())
+    val speakerColors: Map<Int, Color> by _speakerColors
 
     // FUNCTIONS FOR SAVED SPEAKERS
     fun addSavedSpeaker(speaker: Speaker) {
@@ -96,6 +101,17 @@ object ChatRepository {
                 set(chatIndex, updatedChat)
             }
         }
+    }
+
+    // FUNCTIONS FOR SPEAKER COLORS
+    fun setSpeakerColor(speakerId: Int, color: Color) {
+        _speakerColors.value = _speakerColors.value.toMutableMap().apply {
+            put(speakerId, color)
+        }
+    }
+
+    fun getSpeakerColor(speakerId: Int): Color? {
+        return _speakerColors.value[speakerId]
     }
 
     // MOCK DATA FUNCTIONS

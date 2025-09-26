@@ -260,6 +260,307 @@ object SpeakerData {
                     textColor = Color(0xFF374151),
                     borderColor = Color(0xFF84CC16)
                 )
+            ),
+            // NEW SPEAKERS FOR CATALOG (not saved by default)
+            Speaker(
+                id = 16,
+                name = "Klaus",
+                language = "German",
+                flagEmoji = "🇩🇪",
+                avatarSeed = "Klaus",
+                personality = listOf("🎯 Precise", "🧠 Analytical"),
+                interests = listOf("⚽ Football", "🍺 Beer Gardens", "🏰 Castles"),
+                colorClasses = SpeakerColors(
+                    background = Color(0xFF10B981),
+                    cardBackground = Color(0xFF34D399),
+                    textColor = Color.White,
+                    borderColor = Color(0xFF10B981)
+                )
+            ),
+            Speaker(
+                id = 17,
+                name = "Amélie",
+                language = "French",
+                flagEmoji = "🇫🇷",
+                avatarSeed = "Amelie",
+                personality = listOf("🎨 Artistic", "🍷 Sophisticated"),
+                interests = listOf("🥐 Pastries", "🎭 Theater", "🗼 Architecture"),
+                colorClasses = SpeakerColors(
+                    background = Color(0xFF8B5CF6),
+                    cardBackground = Color(0xFFA78BFA),
+                    textColor = Color.White,
+                    borderColor = Color(0xFF8B5CF6)
+                )
+            ),
+            Speaker(
+                id = 18,
+                name = "Carmen",
+                language = "Spanish",
+                flagEmoji = "🇪🇸",
+                avatarSeed = "Carmen",
+                personality = listOf("💃 Passionate", "🎉 Lively"),
+                interests = listOf("💃 Flamenco", "🎸 Guitar", "🌶️ Spicy Food"),
+                colorClasses = SpeakerColors(
+                    background = Color(0xFFEF4444),
+                    cardBackground = Color(0xFFF87171),
+                    textColor = Color.White,
+                    borderColor = Color(0xFFEF4444)
+                )
+            ),
+            Speaker(
+                id = 19,
+                name = "Giulia",
+                language = "Italian",
+                flagEmoji = "🇮🇹",
+                avatarSeed = "Giulia",
+                personality = listOf("😊 Cheerful", "👨‍👩‍👧‍👦 Family-oriented"),
+                interests = listOf("🍝 Pasta", "🎨 Renaissance Art", "🏛️ Ancient Rome"),
+                colorClasses = SpeakerColors(
+                    background = Color(0xFF06B6D4),
+                    cardBackground = Color(0xFF22D3EE),
+                    textColor = Color.White,
+                    borderColor = Color(0xFF06B6D4)
+                )
+            ),
+            Speaker(
+                id = 20,
+                name = "Beatriz",
+                language = "Portuguese",
+                flagEmoji = "🇧🇷",
+                avatarSeed = "Beatriz",
+                personality = listOf("🎵 Musical", "☀️ Optimistic"),
+                interests = listOf("🏖️ Carnival", "⚽ Soccer", "🥭 Tropical Fruits"),
+                colorClasses = SpeakerColors(
+                    background = Color(0xFFF59E0B),
+                    cardBackground = Color(0xFFFBBF24),
+                    textColor = Color(0xFF374151),
+                    borderColor = Color(0xFFF59E0B)
+                )
+            ),
+            Speaker(
+                id = 21,
+                name = "Wei",
+                language = "Chinese",
+                flagEmoji = "🇨🇳",
+                avatarSeed = "Wei",
+                personality = listOf("🧘 Wise", "📚 Scholarly"),
+                interests = listOf("🍵 Tea", "🏯 Temples", "🐉 Dragons"),
+                colorClasses = SpeakerColors(
+                    background = Color(0xFF7C3AED),
+                    cardBackground = Color(0xFF8B5CF6),
+                    textColor = Color.White,
+                    borderColor = Color(0xFF7C3AED)
+                )
+            ),
+            Speaker(
+                id = 22,
+                name = "Yuki",
+                language = "Japanese",
+                flagEmoji = "🇯🇵",
+                avatarSeed = "Yuki",
+                personality = listOf("🌸 Gentle", "🎯 Focused"),
+                interests = listOf("🍱 Bento", "🌸 Cherry Blossoms", "🎎 Traditions"),
+                colorClasses = SpeakerColors(
+                    background = Color(0xFFEC4899),
+                    cardBackground = Color(0xFFF472B6),
+                    textColor = Color.White,
+                    borderColor = Color(0xFFEC4899)
+                )
+            ),
+            Speaker(
+                id = 23,
+                name = "Omar",
+                language = "Arabic",
+                flagEmoji = "🇦🇪",
+                avatarSeed = "Omar",
+                personality = listOf("🤝 Generous", "🌟 Charismatic"),
+                interests = listOf("🏜️ Desert", "🐪 Camels", "📖 Calligraphy"),
+                colorClasses = SpeakerColors(
+                    background = Color(0xFF059669),
+                    cardBackground = Color(0xFF10B981),
+                    textColor = Color.White,
+                    borderColor = Color(0xFF059669)
+                )
+            ),
+            Speaker(
+                id = 24,
+                name = "Priya",
+                language = "Hindi",
+                flagEmoji = "🇮🇳",
+                avatarSeed = "Priya",
+                personality = listOf("🙏 Spiritual", "💫 Vibrant"),
+                interests = listOf("🕉️ Yoga", "🎨 Henna", "🍛 Curry"),
+                colorClasses = SpeakerColors(
+                    background = Color(0xFFDC2626),
+                    cardBackground = Color(0xFFEF4444),
+                    textColor = Color.White,
+                    borderColor = Color(0xFFDC2626)
+                )
+            ),
+            Speaker(
+                id = 25,
+                name = "Alexei",
+                language = "Russian",
+                flagEmoji = "🇷🇺",
+                avatarSeed = "Alexei",
+                personality = listOf("❄️ Resilient", "📖 Intellectual"),
+                interests = listOf("🎭 Ballet", "🏰 Kremlin", "🍲 Borscht"),
+                colorClasses = SpeakerColors(
+                    background = Color(0xFF1D4ED8),
+                    cardBackground = Color(0xFF3B82F6),
+                    textColor = Color.White,
+                    borderColor = Color(0xFF1D4ED8)
+                )
+            ),
+            Speaker(
+                id = 26,
+                name = "Emma",
+                language = "English",
+                flagEmoji = "🇬🇧",
+                avatarSeed = "Emma",
+                personality = listOf("☕ Proper", "🎩 Witty"),
+                interests = listOf("🫖 Afternoon Tea", "👑 Royal Family", "🌧️ Weather"),
+                colorClasses = SpeakerColors(
+                    background = Color(0xFF7C2D12),
+                    cardBackground = Color(0xFF9A3412),
+                    textColor = Color.White,
+                    borderColor = Color(0xFF7C2D12)
+                )
+            ),
+            Speaker(
+                id = 27,
+                name = "Siobhan",
+                language = "Irish",
+                flagEmoji = "🇮🇪",
+                avatarSeed = "Siobhan",
+                personality = listOf("🍀 Lucky", "🎶 Musical"),
+                interests = listOf("🎻 Fiddle", "🏰 Castles", "🍻 Craic"),
+                colorClasses = SpeakerColors(
+                    background = Color(0xFF16A34A),
+                    cardBackground = Color(0xFF22C55E),
+                    textColor = Color.White,
+                    borderColor = Color(0xFF16A34A)
+                )
+            ),
+            Speaker(
+                id = 28,
+                name = "Min-jun",
+                language = "Korean",
+                flagEmoji = "🇰🇷",
+                avatarSeed = "Minjun",
+                personality = listOf("🎯 Focused", "💪 Hardworking"),
+                interests = listOf("🥋 Taekwondo", "🎮 Gaming", "🍜 K-BBQ"),
+                colorClasses = SpeakerColors(
+                    background = Color(0xFF0891B2),
+                    cardBackground = Color(0xFF0EA5E9),
+                    textColor = Color.White,
+                    borderColor = Color(0xFF0891B2)
+                )
+            ),
+            Speaker(
+                id = 29,
+                name = "Lars",
+                language = "Dutch",
+                flagEmoji = "🇳🇱",
+                avatarSeed = "Lars",
+                personality = listOf("🚴 Practical", "🌷 Down-to-earth"),
+                interests = listOf("🚲 Cycling", "🧀 Cheese", "🌷 Tulips"),
+                colorClasses = SpeakerColors(
+                    background = Color(0xFFEA580C),
+                    cardBackground = Color(0xFFF97316),
+                    textColor = Color.White,
+                    borderColor = Color(0xFFEA580C)
+                )
+            ),
+            Speaker(
+                id = 30,
+                name = "Anna",
+                language = "Polish",
+                flagEmoji = "🇵🇱",
+                avatarSeed = "Anna",
+                personality = listOf("💪 Strong", "🏠 Family-oriented"),
+                interests = listOf("🥟 Pierogi", "🏰 Castles", "🎼 Chopin"),
+                colorClasses = SpeakerColors(
+                    background = Color(0xFFBE185D),
+                    cardBackground = Color(0xFFEC4899),
+                    textColor = Color.White,
+                    borderColor = Color(0xFFBE185D)
+                )
+            ),
+            Speaker(
+                id = 31,
+                name = "Emre",
+                language = "Turkish",
+                flagEmoji = "🇹🇷",
+                avatarSeed = "Emre",
+                personality = listOf("🤝 Hospitable", "☕ Energetic"),
+                interests = listOf("☕ Turkish Coffee", "🕌 History", "🍖 Kebabs"),
+                colorClasses = SpeakerColors(
+                    background = Color(0xFF7C2D12),
+                    cardBackground = Color(0xFF9A3412),
+                    textColor = Color.White,
+                    borderColor = Color(0xFF7C2D12)
+                )
+            ),
+            Speaker(
+                id = 32,
+                name = "Astrid",
+                language = "Swedish",
+                flagEmoji = "🇸🇪",
+                avatarSeed = "Astrid",
+                personality = listOf("🌲 Nature-loving", "📚 Intellectual"),
+                interests = listOf("🌲 Forests", "🍞 Fika", "🎵 ABBA"),
+                colorClasses = SpeakerColors(
+                    background = Color(0xFF0F766E),
+                    cardBackground = Color(0xFF14B8A6),
+                    textColor = Color.White,
+                    borderColor = Color(0xFF0F766E)
+                )
+            ),
+            Speaker(
+                id = 33,
+                name = "Magnus",
+                language = "Norwegian",
+                flagEmoji = "🇳🇴",
+                avatarSeed = "Magnus",
+                personality = listOf("⛷️ Adventurous", "🏔️ Outdoor-lover"),
+                interests = listOf("⛷️ Skiing", "🐟 Salmon", "🌌 Northern Lights"),
+                colorClasses = SpeakerColors(
+                    background = Color(0xFF1E40AF),
+                    cardBackground = Color(0xFF3B82F6),
+                    textColor = Color.White,
+                    borderColor = Color(0xFF1E40AF)
+                )
+            ),
+            Speaker(
+                id = 34,
+                name = "Ingrid",
+                language = "Danish",
+                flagEmoji = "🇩🇰",
+                avatarSeed = "Ingrid",
+                personality = listOf("😊 Hygge", "🧘 Peaceful"),
+                interests = listOf("🧱 LEGO", "🍰 Pastries", "🕯️ Hygge"),
+                colorClasses = SpeakerColors(
+                    background = Color(0xFFB91C1C),
+                    cardBackground = Color(0xFFEF4444),
+                    textColor = Color.White,
+                    borderColor = Color(0xFFB91C1C)
+                )
+            ),
+            Speaker(
+                id = 35,
+                name = "Aino",
+                language = "Finnish",
+                flagEmoji = "🇫🇮",
+                avatarSeed = "Aino",
+                personality = listOf("🔥 Resilient", "🌲 Forest-lover"),
+                interests = listOf("🔥 Sauna", "🍄 Mushrooms", "❄️ Winter"),
+                colorClasses = SpeakerColors(
+                    background = Color(0xFF4C1D95),
+                    cardBackground = Color(0xFF7C3AED),
+                    textColor = Color.White,
+                    borderColor = Color(0xFF4C1D95)
+                )
             )
         )
     }
