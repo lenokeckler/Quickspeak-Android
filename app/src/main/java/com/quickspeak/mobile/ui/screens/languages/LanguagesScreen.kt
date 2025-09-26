@@ -274,34 +274,40 @@ private fun LanguageOptionsDialog(
                     Spacer(modifier = Modifier.height(16.dp))
 
                     // Flag
-                    Box(
-                        modifier = Modifier
-                            .size(112.dp)
-                            .clip(CircleShape)
-                            .background(
-                                MaterialTheme.colorScheme.background.copy(
-                                    alpha = 0.2f
-                                )
-                            )
-                            .then(
-                                if (language.isNative) {
-                                    Modifier.border(
-                                        width = 3.dp,
-                                        color = MaterialTheme.colorScheme.primary,
-                                        shape = CircleShape
-                                    )
-                                } else Modifier
-                            ),
-                        contentAlignment = Alignment.Center
+                    Surface(
+                        modifier = Modifier.size(112.dp),
+                        shape = CircleShape,
+                        shadowElevation = 8.dp,
+                        tonalElevation = 4.dp
                     ) {
-                        AsyncImage(
-                            model = language.flagUrl(style = "flat", size = 128),
-                            contentDescription = "${language.name} flag",
+                        Box(
                             modifier = Modifier
-                                .size(128.dp)
-                                .clip(CircleShape),
-                            contentScale = ContentScale.Crop
-                        )
+                                .fillMaxSize()
+                                .background(
+                                    MaterialTheme.colorScheme.background.copy(
+                                        alpha = 0.2f
+                                    )
+                                )
+                                .then(
+                                    if (language.isNative) {
+                                        Modifier.border(
+                                            width = 3.dp,
+                                            color = MaterialTheme.colorScheme.primary,
+                                            shape = CircleShape
+                                        )
+                                    } else Modifier
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            AsyncImage(
+                                model = language.flagUrl(style = "flat", size = 128),
+                                contentDescription = "${language.name} flag",
+                                modifier = Modifier
+                                    .size(128.dp)
+                                    .clip(CircleShape),
+                                contentScale = ContentScale.Crop
+                            )
+                        }
                     }
 
                     Spacer(modifier = Modifier.height(16.dp))
