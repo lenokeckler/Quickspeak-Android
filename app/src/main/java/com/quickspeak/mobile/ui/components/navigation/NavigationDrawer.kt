@@ -24,7 +24,8 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun NavigationDrawerContent(
     currentScreen: String = "Tester",
-    onNavigate: (String) -> Unit = {}
+    onNavigate: (String) -> Unit = {},
+    onLogout: () -> Unit = {}
 ) {
 
     Column(

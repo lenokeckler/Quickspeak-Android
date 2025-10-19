@@ -67,4 +67,5 @@ dependencies {
     implementation(libs.androidx.activity.compose.v182)
 
     implementation("me.tankery.lib:circularSeekBar:1.4.2")
+    implementation("io.coil-kt:coil-compose:2.4.0")
 }

@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.tooling.preview.Preview
-import com.quickspeak.mobile.data.ChatRepository
 import com.quickspeak.mobile.domain.model.Speaker
 import com.quickspeak.mobile.ui.components.navigation.NavigationDrawerContent
 import com.quickspeak.mobile.ui.screens.chat.ChatScreen
@@ -19,6 +18,8 @@ import com.quickspeak.mobile.ui.screens.speakers.SpeakerHome
 import com.quickspeak.mobile.ui.screens.speakers.SpeakerCatalogScreen
 import com.quickspeak.mobile.ui.screens.profile.ProfileScreen
 import com.quickspeak.mobile.ui.screens.settings.SettingsScreen
+import com.quickspeak.mobile.ui.login.LoginScreen
+import com.quickspeak.mobile.ui.login.SignUpScreen
 import com.quickspeak.mobile.ui.theme.QuickSpeakTheme
 import kotlinx.coroutines.launch
 
@@ -64,7 +65,8 @@ fun QuickSpeakApp() {
     val drawerState = rememberDrawerState(DrawerValue.Closed)
 
     // currentScreen: Tracks which screen is currently displayed
-    var currentScreen by remember { mutableStateOf("Speakers") }
+    // STARTS in "Login" instead of "Speakers"
+    var currentScreen by remember { mutableStateOf("Login") }
 
     // speakerScreen: Tracks which speaker screen is currently displayed (Home, Catalog, or Chat)
     var speakerScreen by remember { mutableStateOf("Home") }
@@ -82,20 +84,23 @@ fun QuickSpeakApp() {
     ModalNavigationDrawer(
         drawerState = drawerState,           // Connect our state to the drawer
         drawerContent = {                    // What shows inside the sidebar
-            NavigationDrawerContent(
-                currentScreen = currentScreen,
-                onNavigate = { screen ->
-                    currentScreen = screen
-                    // Reset speaker screen to Home when navigating away
-                    if (screen != "Speakers") {
-                        speakerScreen = "Home"
-                        currentSpeaker = null
+            // Drawer only shows AFTER login/signup
+            if (currentScreen !in listOf("Login", "SignUp")) {
+                NavigationDrawerContent(
+                    currentScreen = currentScreen,
+                    onNavigate = { screen ->
+                        currentScreen = screen
+                        // Reset speaker screen to Home when navigating away
+                        if (screen != "Speakers") {
+                            speakerScreen = "Home"
+                            currentSpeaker = null
+                        }
+                        scope.launch {
+                            drawerState.close()
+                        }
                     }
-                    scope.launch {
-                        drawerState.close()
-                    }
-                }
-            )
+                )
+            }
         },
         content = {                          // Main app content
             // BACK NAVIGATION HANDLING
@@ -118,7 +123,27 @@ fun QuickSpeakApp() {
                 }
             }
 
+            // SCREEN NAVIGATION
             when (currentScreen) {
+                // ---------------- AUTH SCREENS ----------------
+                "Login" -> {
+                    LoginScreen(
+                        onSignUpClick = { currentScreen = "SignUp" },
+                        onLoginClick = { currentScreen = "Speakers" }
+                    )
+                }
+                "SignUp" -> {
+                    SignUpScreen(
+                        onSignUp = { _, _ ->
+                            // Registration logic goes here
+                            currentScreen = "Speakers"
+                        },
+                        onLoginClicked = { currentScreen = "Login" },
+                        onBackClicked = { currentScreen = "Login" }
+                    )
+                }
+
+                // ---------------- MAIN SCREENS ----------------
                 "Speakers" -> {
                     when (speakerScreen) {
                         "Home" -> {
